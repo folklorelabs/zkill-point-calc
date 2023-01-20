@@ -50,8 +50,10 @@ async function getRigSize(shipId) {
     }));
     
     const promises = formattedShips.map(async (ship) => {
-        if (ship.rigSize) return;
-        ship.rigSize = await getRigSize(ship.id);
+        const data = await getType(ship.id);
+        const attrs = data.dogma_attributes;
+        const rigSize = attrs && attrs.find((attr) => attr.attribute_id === DOGMA_ATTR_RIG);
+        ship.rigSize = rigSize ? rigSize.value : 1;
     });
     await Promise.all(promises);
     
