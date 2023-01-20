@@ -155,13 +155,14 @@ export function getInvolvedSizeMultiplier(state) {
   const numInvolved = state.involvedShips.length;
   if (!victimBasePoints || !numInvolved) return 1;
   const involvedSizeTotal = state.involvedShips.reduce((total, ship) => {
+    console.log(ship.rigSize);
     const shipVal = !ship.rigSize
       ? victimBasePoints + 1
       : ship.rigSize;
     return total + Math.pow(5, shipVal);
   }, 0);
-  const involvedSize = Math.max(1, involvedSizeTotal / numInvolved);
-  const involvedSizeMultiplier = Math.min(1.2, Math.max(0.5, victimBasePoints / involvedSize));
+  const involvedAvgSize = Math.max(1, involvedSizeTotal / numInvolved);
+  const involvedSizeMultiplier = Math.min(1.2, Math.max(0.5, victimBasePoints / involvedAvgSize));
   return involvedSizeMultiplier;
 }
 
