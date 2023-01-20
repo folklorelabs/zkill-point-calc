@@ -45,8 +45,8 @@ function App() {
     const action = await loadVictim(val);
     zkillPointsDispatch(action);
   }, [zkillPointsDispatch]);
-  const btnAttackerAddHandler = useCallback(() => {
-    const val = selInvolvedRef.current.value;
+  const btnAttackerAddHandler = useCallback((newValue) => {
+    const val = typeof newValue === 'string' ? newValue : selInvolvedRef.current.value;
     zkillPointsDispatch(loadInvolved(val));
   }, [zkillPointsDispatch]);
   const btnAttackerRemoveHandler = useCallback((uuid) => {
@@ -142,37 +142,20 @@ function App() {
           onClick={btnEftHandler}
         >Submit</Button>
       </div>
-      <FormControl sx={{ m: 1, minWidth: 320 }} size="small">
-        <Autocomplete
-          disablePortal
-          id="attacker-select"
-          options={SHIPS.sort((a, b) => `${a.rigSize} ${a.group}`.localeCompare(`${b.rigSize} ${b.group}`))}
-          groupBy={(option) => `${option.group} (${Math.pow(5, option.rigSize)} points)`}
-          getOptionLabel={(option) => option.name}
-          sx={{ width: 300 }}
-          renderInput={(params) => <TextField {...params} inputRef={selInvolvedRef} label="Attacking Ship" />}
-        />
-        {/* <NativeSelect
-          labelId="attacker-select"
-          id="attacker-select"
-          inputProps={{
-            ref: selInvolvedRef
-          }}
-          label="Attacking Ship"
-        >
-          <option value="Capsule">
-            Capsule
-          </option>
-          {SHIPS.map((ship) => (
-            <option
-              key={ship.id}
-              value={ship.id}
-            >
-                {ship.name}
-            </option>
-        ))}
-        </NativeSelect> */}
-      </FormControl>
+      <Autocomplete
+        id="attacker-select"
+        options={SHIPS.sort((a, b) => `${a.rigSize} ${a.group}`.localeCompare(`${b.rigSize} ${b.group}`))}
+        groupBy={(option) => `${option.group} (${Math.pow(5, option.rigSize)} points)`}
+        getOptionLabel={(option) => option.name}
+        sx={{ width: 300 }}
+        renderInput={(params) => <TextField {...params} inputRef={selInvolvedRef} variant="standard" />}
+        // onChange={(event, newValue) => {
+        //   if (!newValue || !newValue.name) return;
+        //   btnAttackerAddHandler(newValue.name);
+        //   event.target.value = '';
+        // }}
+        clearOnEscape
+      />
       <div>
         <Button
           onClick={btnAttackerAddHandler}
