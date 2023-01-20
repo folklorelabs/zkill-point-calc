@@ -70,7 +70,7 @@ async function getType(typeId) {
             const heatDamage = heatDamageAttr && heatDamageAttr.value;
             module.metaLevel = parseInt(metaLevel, 10);
             let dangerMulti = 0;
-            if (parseInt(heatDamage, 10) > 0) {
+            if (parseFloat(heatDamage, 10) > 0) {
                 module.hasHeat = true;
                 dangerMulti += 1;
             }
