@@ -167,14 +167,18 @@ export function getInvolvedSizeMultiplier(state) {
 
 export function getTotalPoints(state) {
   const victimBasePoints = getVictimBasePoints(state);
-  const victimDangerFactor = getVictimDangerFactor(state);
-  const involvedQtyPenalty = getInvolvedQtyPenalty(state);
-  const involvedSizeMultiplier = getInvolvedSizeMultiplier(state);
   let points = victimBasePoints;
+
+  const victimDangerFactor = getVictimDangerFactor(state);
   points += victimDangerFactor;
   points *= Math.max(0.01, Math.min(1, victimDangerFactor / 4));
+
+  const involvedQtyPenalty = getInvolvedQtyPenalty(state);
   points = points / involvedQtyPenalty;
+
+  const involvedSizeMultiplier = getInvolvedSizeMultiplier(state);
   points = Math.floor(points * involvedSizeMultiplier);
+
   return Math.max(1, points);
 }
 
