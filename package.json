@@ -1,6 +1,6 @@
 {
   "name": "zkill-point-calc",
-  "path": "./",
+  "homepage": "./",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
