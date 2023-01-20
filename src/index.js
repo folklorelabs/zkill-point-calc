@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+import './index.styles.js';
+import CssBaseline from '@mui/material/CssBaseline';
 import App from './components/App';
 import { ZkillPointsProvider } from './contexts/ZkillPoints';
 import reportWebVitals from './reportWebVitals';
@@ -9,6 +11,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <ZkillPointsProvider>
+      <CssBaseline />
       <App />
     </ZkillPointsProvider>
   </React.StrictMode>
