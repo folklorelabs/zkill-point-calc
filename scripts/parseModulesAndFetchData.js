@@ -74,11 +74,11 @@ async function getType(typeId) {
                 module.hasHeat = true;
                 dangerMulti += 1;
             }
-            if (module.groupID === 645) {
+            if (module.groupID === '645') {
                 module.isDroneMod = true;
                 dangerMulti += 1;
             }
-            if (module.groupID === 54) {
+            if (module.groupID === '54') {
                 module.isMiningMod = true;
                 if (module.isMiningMod) dangerMulti -= 1;
             }
