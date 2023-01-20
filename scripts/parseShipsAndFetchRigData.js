@@ -23,14 +23,6 @@ async function getType(typeId) {
     return data;
 }
 
-async function getRigSize(shipId) {
-    const data = await getType(shipId);
-    if (!data || !data.dogma_attributes) throw new Error(`No attributes found for ship ${shipId}`);
-    const attrs = data.dogma_attributes;
-    const rigAttr = attrs.find((attr) => attr.attribute_id === DOGMA_ATTR_RIG);
-    return rigAttr ? rigAttr.value : 1;
-}
-
 (async () => {
     const categories = await getInvData('invCategories');
     const shipCategory = categories.find(c => c.categoryName === 'Ship');
