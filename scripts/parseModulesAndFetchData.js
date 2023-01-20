@@ -55,7 +55,7 @@ async function getType(typeId) {
     const formattedModules = modules.map((module) => ({
         id: module.typeID,
         name: module.typeName,
-        groupId: module.groupID,
+        groupID: module.groupID,
         group: groups.find(g => g.groupID === module.groupID).groupName,
     }));
     
