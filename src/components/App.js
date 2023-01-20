@@ -61,7 +61,7 @@ function App() {
       {state.victimShip ? (
         <>
           <Typography variant="h2" gutterBottom>
-            {state.totalPoints}
+            {state.totalPoints} Points
           </Typography>
           <Typography variant="h5" gutterBottom>
             Victim Breakdown
@@ -69,21 +69,21 @@ function App() {
           <ul>
             <li>
               <Tooltip title="Determined by rig slot size">
-                <span>Base Points: {state.victimBasePoints} ({state.victimShip.name})</span>
+                <span>{state.victimShip.name} ({state.victimBasePoints} points)</span>
               </Tooltip>
             </li>
             <li>
               <Tooltip title="Based on meta value of DDAs and modules with heat. Mining harvesters reduce by same amount.">
-                <span>Danger Factor: {state.victimDangerFactor}</span>
+                <span>Danger Factor ({state.victimDangerFactor} points)</span>
               </Tooltip>
               <ul>
-                {state.victimShip.modules.filter(module => module.dangerFactor > 0).map((module, i) => (
+                {state.victimShip.modules.filter(module => module.dangerFactor !== 0).map((module, i) => (
                   <li
                     key={module.uuid}
                     value={module.id}
                   >
                     <Tooltip title={`This module ${module.hasHeat ? 'has heat' : ''}${module.isDroneMod ? 'is a drone dmg mod' : ''}${module.isMiningMod ? 'is a mining harvester' : ''}`}>
-                      <span>{module.name} ({module.dangerFactor})</span>
+                      <span>{module.name} ({module.dangerFactor} points)</span>
                     </Tooltip>
                   </li>
                 ))}
@@ -101,7 +101,7 @@ function App() {
                   <li
                     key={ship.uuid}
                   >
-                    {ship.name}
+                    {ship.name} ({Math.pow(5, ship.rigSize)} points)
                     <IconButton
                       aria-label="delete"
                       size="small"

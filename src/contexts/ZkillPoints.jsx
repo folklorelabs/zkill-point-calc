@@ -54,9 +54,9 @@ export async function loadVictim(victimEft) {
     .filter((module) => !!module);
   return [ACTIONS.LOAD_VICTIM, victimShip];
 }
-export function loadInvolved(shipId) {
-  const involvedShip = SHIPS.find((s) => `${s.id}` === shipId) || {
-    name: shipId,
+export function loadInvolved(shipName) {
+  const involvedShip = SHIPS.find((s) => `${s.name}` === shipName) || {
+    name: shipName,
   };
   return [ACTIONS.ADD_INVOLVED, involvedShip];
 }
