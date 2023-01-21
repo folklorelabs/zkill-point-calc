@@ -181,7 +181,7 @@ function App() {
                       <li
                         key={ship.uuid}
                       >
-                        <Tooltip title={ship.name === 'Capsule' ? 'Capsules are equal to victim ship rig size + 1.' : `Determined by rig slot size (5 ^ ${ship.rigSize})`}>
+                        <Tooltip title={ship.name === 'Capsule' ? `Capsules are a special case. Point value is based on the victim ship's rig slot size + 1 (${state.shipInfo.rigSize + 1}). Calculation is (5 ^ (victimRigSlotSize + 1)).` : `Point value is based on the ship's rig slot size (${ship.rigSize}). Calculation is (5 ^ rigSlotSize).`}>
                           <span>{ship.name} ({ship.name === 'Capsule' ? Math.pow(5, state.shipInfo.rigSize + 1) : Math.pow(5, ship.rigSize)} points)</span>
                         </Tooltip>
                       </li>
