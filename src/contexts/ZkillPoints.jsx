@@ -42,8 +42,8 @@ export function parseEft(eft) {
 
 // STATE
 const INITIAL_STATE = {
-  victimShip: null,
-  involvedShips: [],
+  shipInfo: null,
+  attackers: [],
 };
 
 // ACTIONS
@@ -56,15 +56,15 @@ export function reset() {
   return [ACTIONS.RESET];
 }
 export function loadVictim(victim) {
-  const victimShip = typeof victim === 'string' ? parseEft(victim) : victim;
-  return [ACTIONS.LOAD_VICTIM, victimShip];
+  const shipInfo = typeof victim === 'string' ? parseEft(victim) : victim;
+  return [ACTIONS.LOAD_VICTIM, shipInfo];
 }
-export function loadInvolvedShips(ships) {
-  const involvedShips = ships.map((ship) => ({
+export function loadAttackers(ships) {
+  const attackers = ships.map((ship) => ({
     ...ship,
     uuid: uuid(),
   }));
-  return [ACTIONS.LOAD_INVOLVED, involvedShips];
+  return [ACTIONS.LOAD_INVOLVED, attackers];
 }
 
 // REDUCER
@@ -78,13 +78,13 @@ function REDUCER(state, [type, payload]) {
     case ACTIONS.LOAD_VICTIM:
       return {
         ...state,
-        victimShip: payload,
+        shipInfo: payload,
       };
     case ACTIONS.ADD_INVOLVED:
       return {
         ...state,
-        involvedShips: [
-          ...state.involvedShips,
+        attackers: [
+          ...state.attackers,
           {
             ...payload,
             uuid: uuid(),
@@ -94,13 +94,13 @@ function REDUCER(state, [type, payload]) {
     case ACTIONS.LOAD_INVOLVED:
       return {
         ...state,
-        involvedShips: payload,
+        attackers: payload,
       };
     case ACTIONS.REMOVE_INVOLVED:
       return {
         ...state,
-        involvedShips: [
-          ...state.involvedShips.filter((ship) => ship.uuid !== payload),
+        attackers: [
+          ...state.attackers.filter((ship) => ship.uuid !== payload),
         ],
       };
     default:
@@ -109,12 +109,12 @@ function REDUCER(state, [type, payload]) {
 }
 
 // GETTERS
-export function getVictimBasePoints(state) {
-  if (!state.victimShip) return 0;
-  const victimBasePoints = Math.pow(5, state.victimShip.rigSize);
-  return victimBasePoints;
+export function getBasePoints(state) {
+  if (!state.shipInfo) return 0;
+  const basePoints = Math.pow(5, state.shipInfo.rigSize);
+  return basePoints;
 }
-export function getVictimDangerFactor(state) {
+export function getDangerFactor(state) {
   /*
     $typeID = $item['item_type_id'];
     $qty = @$item['quantity_destroyed'] + @$item['quantity_dropped'];
@@ -125,65 +125,63 @@ export function getVictimDangerFactor(state) {
     $dangerFactor += ($itemInfo['groupID'] == 645) * $qty * $meta; // drone damange multipliers
     $dangerFactor -= ($itemInfo['groupID'] == 54) * $qty * $meta; // Mining ships don't earn as many points
   */
-  if (!state.victimShip) return 0;
-  const victimDangerFactor = state.victimShip.modules.reduce((totalDanger, module) => {
+  if (!state.shipInfo) return 0;
+  const victimDangerFactor = state.shipInfo.modules.reduce((totalDanger, module) => {
     return totalDanger + module.dangerFactor;
   }, 0);
   return victimDangerFactor;
 }
-export function getInvolvedQtyPenalty(state) {
+export function getBlobPenalty(state) {
   /*
     $numAttackers = sizeof($killmail['attackers']);
     $involvedPenalty = max(1, $numAttackers * max(1, $numAttackers / 2));
   */
-  const numInvolved = state.involvedShips.length;
-  const involvedQtyPenalty = Math.max(1, numInvolved * Math.max(1, numInvolved / 2));
-  return involvedQtyPenalty;
+  const numAttackers = state.attackers.length;
+  const involvedPenalty = Math.max(1, numAttackers * Math.max(1, numAttackers / 2));
+  return involvedPenalty;
 }
-export function getInvolvedSizeMultiplier(state) {
+export function getShipSizeMultiplier(state) {
   /*
     $size = 0;
     $hasChar = false;
     foreach ((array) $killmail['attackers'] as $attacker) {
-        $hasChar |= @$attacker['character_id'] > 0;
-        $victimShipTypeID = @$attacker['ship_type_id'];
-        $categoryID = Info::getInfoField("typeID", $victimShipTypeID, "categoryID");
-        if ($categoryID == 65) return 1; // Structure on your mail, only 1 point
+        // $hasChar |= @$attacker['character_id'] > 0;
+        $shipTypeID = @$attacker['ship_type_id'];
+        // $categoryID = Info::getInfoField("typeID", $shipTypeID, "categoryID");
+        // if ($categoryID == 65) return 1; // Structure on your mail, only 1 point
 
-        $aInfo = Info::getInfo('typeID', $victimShipTypeID);
-        $aInfo['rigSize'] = self::getRigSize($victimShipTypeID);
-        $size += pow(5, ((@$aInfo['groupID'] != 29) ? @$aInfo['rigSize'] : @$victimShipInfo['rigSize'] + 1));
+        $aInfo = Info::getInfo('typeID', $shipTypeID);
+        $aInfo['rigSize'] = self::getRigSize($shipTypeID);
+        $size += pow(5, ((@$aInfo['groupID'] != 29) ? @$aInfo['rigSize'] : @$shipInfo['rigSize'] + 1));
     }
     if ($hasChar == false) return 1;
     $avg = max(1, $size / $numAttackers);
     $modifier = min(1.2, max(0.5, $basePoints / $avg));
   */
-  const victimBasePoints = getVictimBasePoints(state);
-  const numInvolved = state.involvedShips.length;
-  if (!victimBasePoints || !numInvolved) return 1;
-  const involvedSizeTotal = state.involvedShips.reduce((total, ship) => {
-    const shipVal = !ship.rigSize
-      ? victimBasePoints + 1
-      : ship.rigSize;
-    return total + Math.pow(5, shipVal);
+  const basePoints = getBasePoints(state);
+  const shipInfo = state.shipInfo;
+  const numInvolved = state.attackers.length;
+  if (!shipInfo || !numInvolved) return 1;
+  const size = state.attackers.reduce((size, aInfo) => {
+    return size + Math.pow(5, aInfo.group !== 'Capsule' ? aInfo.rigSize : shipInfo.rigSize + 1);
   }, 0);
-  const involvedAvgSize = Math.max(1, involvedSizeTotal / numInvolved);
-  const involvedSizeMultiplier = Math.min(1.2, Math.max(0.5, victimBasePoints / involvedAvgSize));
-  return involvedSizeMultiplier;
+  const avg = Math.max(1, size / numInvolved);
+  const modifier = Math.min(1.2, Math.max(0.5, basePoints / avg));
+  return modifier;
 }
 
 export function getTotalPoints(state) {
-  const victimBasePoints = getVictimBasePoints(state);
-  let points = victimBasePoints;
+  const basePoints = getBasePoints(state);
+  let points = basePoints;
 
-  const victimDangerFactor = getVictimDangerFactor(state);
+  const victimDangerFactor = getDangerFactor(state);
   points += victimDangerFactor;
   points *= Math.max(0.01, Math.min(1, victimDangerFactor / 4));
 
-  const involvedQtyPenalty = getInvolvedQtyPenalty(state);
+  const involvedQtyPenalty = getBlobPenalty(state);
   points = points / involvedQtyPenalty;
 
-  const involvedSizeMultiplier = getInvolvedSizeMultiplier(state);
+  const involvedSizeMultiplier = getShipSizeMultiplier(state);
   points = Math.floor(points * involvedSizeMultiplier);
 
   return Math.max(1, points);
@@ -208,7 +206,7 @@ export function ZkillPointsProvider({
   useEffect(() => {
     const url = new URL(window.location);
     const params = url.searchParams;
-    const victimShip = SHIPS.find((s) => s.name === params.get('victimShip'));
+    const shipInfo = SHIPS.find((s) => s.name === params.get('shipInfo'));
     const victimModulesQuery = params.get('victimModules') || '';
     const victimModules = victimModulesQuery.split(',')
       .map((moduleName) => MODULES.find((m) => m.name === moduleName))
@@ -219,16 +217,16 @@ export function ZkillPointsProvider({
       }));
     if (victimModules.length) {
       zkillPointsDispatch(loadVictim({
-        ...victimShip,
+        ...shipInfo,
         modules: victimModules,
       }));
     }
-    const involvedShipsQuery = params.get('involvedShips') || '';
-    const involvedShips = involvedShipsQuery.split(',')
+    const attackersQuery = params.get('attackers') || '';
+    const attackers = attackersQuery.split(',')
       .map((shipName) => SHIPS.find((s) => s.name === shipName))
       .filter((ship) => !!ship);
-    if (involvedShips.length) {
-      zkillPointsDispatch(loadInvolvedShips(involvedShips));
+    if (attackers.length) {
+      zkillPointsDispatch(loadAttackers(attackers));
     }
   }, []);
 

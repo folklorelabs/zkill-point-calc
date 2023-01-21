@@ -4,11 +4,11 @@ import {
 import {
   useZkillPointsContext,
   loadVictim,
-  loadInvolvedShips,
-  getVictimBasePoints,
-  getVictimDangerFactor,
-  getInvolvedQtyPenalty,
-  getInvolvedSizeMultiplier,
+  loadAttackers,
+  getBasePoints,
+  getDangerFactor,
+  getBlobPenalty,
+  getShipSizeMultiplier,
   getTotalPoints,
 } from '../contexts/ZkillPoints';
 
@@ -39,35 +39,40 @@ const GroupItems = styled('ul')({
 function App() {
   const { zkillPointsState, zkillPointsDispatch } = useZkillPointsContext();
   const state = useMemo(() => ({
-    victimShip: zkillPointsState.victimShip,
-    victimBasePoints: getVictimBasePoints(zkillPointsState),
-    victimDangerFactor: getVictimDangerFactor(zkillPointsState),
-    involvedQtyPenalty: getInvolvedQtyPenalty(zkillPointsState),
-    involvedSizeMultiplier: getInvolvedSizeMultiplier(zkillPointsState),
+    shipInfo: zkillPointsState.shipInfo,
+    basePoints: getBasePoints(zkillPointsState),
+    dangerFactor: getDangerFactor(zkillPointsState),
+    blobPenalty: getBlobPenalty(zkillPointsState),
+    shipSizeMultiplier: getShipSizeMultiplier(zkillPointsState),
     totalPoints: getTotalPoints(zkillPointsState),
   }), [zkillPointsState]);
   const url = useMemo(() => {
-    const { victimShip, involvedShips } = zkillPointsState;
-    if (!victimShip) return '';
+    const { shipInfo, attackers } = zkillPointsState;
+    if (!shipInfo) return '';
     const params = new URLSearchParams();
-    params.append('victimShip', victimShip.name);
-    const victimModuleNames = victimShip.modules && victimShip.modules
+    params.append('shipInfo', shipInfo.name);
+    const victimModuleNames = shipInfo.modules && shipInfo.modules
       .filter((m) => m.dangerFactor !== 0)
       .map((m) => m.name)
       .join(',');
     if (victimModuleNames) {
       params.append('victimModules', victimModuleNames);
     }
-    const involvedShipNames = involvedShips && involvedShips.map((m) => m.name).join(',');
+    const involvedShipNames = attackers && attackers.map((m) => m.name).join(',');
     if (involvedShipNames) {
-      params.append('involvedShips', involvedShipNames);
+      params.append('attackers', involvedShipNames);
     }
     return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
   }, [zkillPointsState]);
+  const availableAttackers = useMemo(() => {
+    return [
+      ...SHIPS,
+    ].sort((a, b) => `${a.rigSize} ${a.group}`.localeCompare(`${b.rigSize} ${b.group}`));
+  }, []);
   const averageAttackerSize = useMemo(() => {
-    const attackerShips = zkillPointsState.involvedShips;
+    const attackerShips = zkillPointsState.attackers;
     return Math.max(1, attackerShips.reduce((total, ship) => {
-      return total + (ship.name === 'Capsule' ? Math.pow(5, zkillPointsState.victimShip.rigSize + 1) : Math.pow(5, ship.rigSize));
+      return total + (ship.name === 'Capsule' ? Math.pow(5, zkillPointsState.shipInfo.rigSize + 1) : Math.pow(5, ship.rigSize));
     }, 0) / attackerShips.length);
   }, [zkillPointsState]);
   
@@ -94,8 +99,8 @@ function App() {
             id="attacker-select"
             multiple
             limitTags={2}
-            options={SHIPS.sort((a, b) => `${a.rigSize} ${a.group}`.localeCompare(`${b.rigSize} ${b.group}`))}
-            value={zkillPointsState.involvedShips}
+            options={availableAttackers}
+            value={zkillPointsState.attackers}
             isOptionEqualToValue={(option, value) => false}
             groupBy={(option) => `${option.group} (${Math.pow(5, option.rigSize)} points)`}
             getOptionLabel={(option) => option.name}
@@ -109,12 +114,12 @@ function App() {
             )}
             clearOnEscape
             onChange={(event, newValue) => {
-              zkillPointsDispatch(loadInvolvedShips(newValue));
+              zkillPointsDispatch(loadAttackers(newValue));
             }}
           />
         </FormControl>
       </div>
-      {state.victimShip ? (
+      {state.shipInfo ? (
         <>
           <Divider sx={{ margin: '3em 0' }} />
           <Typography variant="h2" gutterBottom sx={{ textAlign: 'center' }}>
@@ -125,16 +130,16 @@ function App() {
           </Typography>
           <ul>
             <li>
-              <Tooltip title={`Determined by rig slot size (5 ^ ${state.victimShip.rigSize})`}>
-                <span>{state.victimShip.name} ({state.victimBasePoints} points)</span>
+              <Tooltip title={`Determined by rig slot size (5 ^ ${state.shipInfo.rigSize})`}>
+                <span>{state.shipInfo.name} ({state.basePoints} points)</span>
               </Tooltip>
             </li>
             <li>
               <Tooltip title={`The sum of all fitted "dangerous" modules flagged as a High Slot, Mid Slot, Low Slot, or SubSystem at time of death. Modules are considered "dangerous" if they are a Drone Damage mod or if they can be overheated. Likewise, Mining Lasers actually reduce this value.`}>
-                <span>Danger Factor ({state.victimDangerFactor} points)</span>
+                <span>Danger Factor ({state.dangerFactor} points)</span>
               </Tooltip>
               <ul>
-                {state.victimShip.modules.map((module, i) => (
+                {state.shipInfo.modules.map((module, i) => (
                   <li
                     key={module.uuid}
                     value={module.id}
@@ -159,12 +164,12 @@ function App() {
           <ul>
             <li>
               <Tooltip title="Reduces points exponentially based on the number of attackers.">
-                <span>Blob Multiplier Penalty: {1 / state.involvedQtyPenalty}</span>
+                <span>Blob Multiplier Penalty: {1 / state.blobPenalty}</span>
               </Tooltip>
             </li>
             <li>
               <Tooltip title="Apply a bonus/penalty from -50% to 20% depending on average size of attacking ships. For example: Smaller ships blowing up bigger ships get a bonus or bigger ships blowing up smaller ships get a penalty.">
-                <span>Ship Size Multiplier: {state.involvedSizeMultiplier}</span>
+                <span>Ship Size Multiplier: {state.shipSizeMultiplier}</span>
               </Tooltip>
               <ul>
                 <li>
@@ -172,12 +177,12 @@ function App() {
                   <span>Average: {averageAttackerSize}</span>
                 </Tooltip>
                   <ul>
-                    {zkillPointsState.involvedShips.map((ship) => (
+                    {zkillPointsState.attackers.map((ship) => (
                       <li
                         key={ship.uuid}
                       >
                         <Tooltip title={ship.name === 'Capsule' ? 'Capsules are equal to victim ship rig size + 1.' : `Determined by rig slot size (5 ^ ${ship.rigSize})`}>
-                          <span>{ship.name} ({ship.name === 'Capsule' ? Math.pow(5, state.victimShip.rigSize + 1) : Math.pow(5, ship.rigSize)} points)</span>
+                          <span>{ship.name} ({ship.name === 'Capsule' ? Math.pow(5, state.shipInfo.rigSize + 1) : Math.pow(5, ship.rigSize)} points)</span>
                         </Tooltip>
                       </li>
                     ))}

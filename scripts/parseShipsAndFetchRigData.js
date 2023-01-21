@@ -48,6 +48,13 @@ async function getType(typeId) {
         ship.rigSize = rigSize ? rigSize.value : 1;
     });
     await Promise.all(promises);
+
+    formattedShips.push({
+        id: 'Rat',
+        name: 'Rat',
+        group: 'Rat',
+        rigSize: 1,
+    });
     
     const dest = path.resolve(__dirname, '../src/data/ships.json');
     await fs.writeFileSync(dest, JSON.stringify(formattedShips));
