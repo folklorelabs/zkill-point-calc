@@ -209,25 +209,25 @@ export function ZkillPointsProvider({
     const url = new URL(window.location);
     const params = url.searchParams;
     const victimShip = SHIPS.find((s) => s.name === params.get('victimShip'));
-    const victimModulesQuery = params.get('victimModules');
-    const victimModules = victimModulesQuery && victimModulesQuery.split(',')
+    const victimModulesQuery = params.get('victimModules') || '';
+    const victimModules = victimModulesQuery.split(',')
       .map((moduleName) => MODULES.find((m) => m.name === moduleName))
       .filter((module) => !!module)
       .map((module) => ({
         ...module,
         uuid: uuid(),
       }));
-    if (victimModules && victimModules.length) {
+    if (victimModules.length) {
       zkillPointsDispatch(loadVictim({
         ...victimShip,
         modules: victimModules,
       }));
     }
-    const involvedShips = params.get('involvedShips').split(',')
+    const involvedShipsQuery = params.get('involvedShips') || '';
+    const involvedShips = involvedShipsQuery.split(',')
       .map((shipName) => SHIPS.find((s) => s.name === shipName))
       .filter((ship) => !!ship);
-    console.log(involvedShips);
-    if (involvedShips) {
+    if (involvedShips.length) {
       zkillPointsDispatch(loadInvolvedShips(involvedShips));
     }
   }, []);

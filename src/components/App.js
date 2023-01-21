@@ -1,6 +1,5 @@
-import { useCallback,
+import {
   useMemo,
-  useRef,
 } from 'react';
 import {
   useZkillPointsContext,
@@ -18,7 +17,6 @@ import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import Divider from '@mui/material/Divider';
 import { styled } from '@mui/system';
@@ -39,8 +37,6 @@ const GroupItems = styled('ul')({
 });
 
 function App() {
-  const txtEftRef = useRef();
-  const selInvolvedRef = useRef();
   const { zkillPointsState, zkillPointsDispatch } = useZkillPointsContext();
   const state = useMemo(() => ({
     victimShip: zkillPointsState.victimShip,
@@ -68,11 +64,6 @@ function App() {
     }
     return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
   }, [zkillPointsState]);
-  const btnEftHandler = useCallback(async () => {
-    const val = txtEftRef.current.value;
-    const action = await loadVictim(val);
-    zkillPointsDispatch(action);
-  }, [zkillPointsDispatch]);
   const averageAttackerSize = useMemo(() => {
     const attackerShips = zkillPointsState.involvedShips;
     return Math.max(1, attackerShips.reduce((total, ship) => {
@@ -93,14 +84,11 @@ function App() {
             multiline
             maxRows={15}
             variant="standard"
-            inputRef={txtEftRef}
-            />
+            onChange={(e) => {
+              zkillPointsDispatch(loadVictim(e.target.value));
+            }}
+          />
         </FormControl>
-        <div>
-          <Button
-            onClick={btnEftHandler}
-            >Submit</Button>
-        </div>
         <FormControl sx={{ m: 1, minWidth: 320 }} size="small">
           <Autocomplete
             id="attacker-select"
@@ -112,7 +100,7 @@ function App() {
             groupBy={(option) => `${option.group} (${Math.pow(5, option.rigSize)} points)`}
             getOptionLabel={(option) => option.name}
             sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} inputRef={selInvolvedRef} label="Ship" variant="standard" />}
+            renderInput={(params) => <TextField {...params} label="Ship" variant="standard" />}
             renderGroup={(params) => (
               <li>
                 <GroupHeader>{params.group}</GroupHeader>
