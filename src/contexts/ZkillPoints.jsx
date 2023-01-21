@@ -160,29 +160,32 @@ export function getShipSizeMultiplier(state) {
   */
   const basePoints = getBasePoints(state);
   const shipInfo = state.shipInfo;
-  const numInvolved = state.attackers.length;
-  if (!shipInfo || !numInvolved) return 1;
+  const numAttackers = state.attackers.length;
+  if (!shipInfo || !numAttackers) return 1;
   const size = state.attackers.reduce((size, aInfo) => {
     return size + Math.pow(5, aInfo.group !== 'Capsule' ? aInfo.rigSize : shipInfo.rigSize + 1);
   }, 0);
-  const avg = Math.max(1, size / numInvolved);
+  const avg = Math.max(1, size / numAttackers);
   const modifier = Math.min(1.2, Math.max(0.5, basePoints / avg));
   return modifier;
 }
 
 export function getTotalPoints(state) {
+  if (state.shipInfo && state.shipInfo.group === 'Capsule') return 1;
+  if (state.attackers.find((a) => a.group === 'Structure')) return 1;
+
   const basePoints = getBasePoints(state);
   let points = basePoints;
 
-  const victimDangerFactor = getDangerFactor(state);
-  points += victimDangerFactor;
-  points *= Math.max(0.01, Math.min(1, victimDangerFactor / 4));
+  const dangerFactor = getDangerFactor(state);
+  points += dangerFactor;
+  points *= Math.max(0.01, Math.min(1, dangerFactor / 4));
 
-  const involvedQtyPenalty = getBlobPenalty(state);
-  points = points / involvedQtyPenalty;
+  const blobPenaltyModifier = 1 / getBlobPenalty(state);
+  points = points * blobPenaltyModifier;
 
-  const involvedSizeMultiplier = getShipSizeMultiplier(state);
-  points = Math.floor(points * involvedSizeMultiplier);
+  const shipSizeMultiplier = getShipSizeMultiplier(state);
+  points = Math.floor(points * shipSizeMultiplier);
 
   return Math.max(1, points);
 }
