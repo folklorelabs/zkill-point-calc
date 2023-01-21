@@ -130,7 +130,7 @@ function App() {
           </Typography>
           <ul>
             <li>
-              <Tooltip title={`Determined by rig slot size (5 ^ ${state.shipInfo.rigSize})`}>
+              <Tooltip title={`Point value is based on the ship's rig slot size (${state.shipInfo.rigSize}). Calculation is (5 ^ rigSlotSize).`}>
                 <span>{state.shipInfo.name} ({state.basePoints} points)</span>
               </Tooltip>
             </li>
@@ -145,7 +145,7 @@ function App() {
                     value={module.id}
                     style={{ opacity: module.dangerFactor === 0 ? 0.5 : 1 }}
                   >
-                    <Tooltip title={`This module ${module.dangerFactor === 0 ? 'is not factored into point tally.' : ''} ${module.hasHeat ? 'is factored into point tally because it has heat damage.' : ''}${module.isDroneMod ? 'is factored into point tally because it is a drone damage mod.' : ''}${module.isMiningMod ? 'is factored into point tally because it is a mining harvester.' : ''}${module.hasHeat || module.isDroneMod || module.isMiningMod ? ` The point value is based on the module's meta level (${module.metaLevel}). Calculation is 1 + floor(metaLevel / 2)).` : ''}`}>
+                    <Tooltip title={`This module ${module.dangerFactor === 0 ? 'is not factored into point tally.' : ''} ${module.hasHeat ? 'is factored into point tally because it has heat damage.' : ''}${module.isDroneMod ? 'is factored into point tally because it is a drone damage mod.' : ''}${module.isMiningMod ? 'is factored into point tally because it is a mining harvester.' : ''}${module.hasHeat || module.isDroneMod || module.isMiningMod ? ` Point value is based on the module's meta level (${module.metaLevel}). Calculation is 1 + floor(metaLevel / 2)).` : ''}`}>
                       <span>{module.name} ({module.dangerFactor} points)</span>
                     </Tooltip>
                   </li>
