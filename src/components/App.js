@@ -151,7 +151,7 @@ function App() {
                   </li>
                 ))}
                 <li style={{ opacity: 0.5 }}>
-                  <Tooltip title="Only modules equiped on the ship flagged as High Slot, Mid Slot, Low Slot, or SubSystem are considered for point tally. Cargo items ignored.">
+                  <Tooltip title="Cargo items are ignored in tally.">
                     <span>Cargo Items (0 points)</span>
                   </Tooltip>
                 </li>
@@ -164,12 +164,12 @@ function App() {
           <ul>
             <li>
               <Tooltip title="Reduces points exponentially based on the number of attackers.">
-                <span>Blob Multiplier Penalty: {1 / state.blobPenalty}</span>
+                <span>Blob Multiplier Penalty: {`${1 / state.blobPenalty < 1 ? '-' : '+'}${100 - Math.round(1 / state.blobPenalty * 100)}%`}</span>
               </Tooltip>
             </li>
             <li>
-              <Tooltip title="Apply a bonus/penalty from -50% to 20% depending on average size of attacking ships. For example: Smaller ships blowing up bigger ships get a bonus or bigger ships blowing up smaller ships get a penalty.">
-                <span>Ship Size Multiplier: {state.shipSizeMultiplier}</span>
+              <Tooltip title="Apply a bonus/penalty from -50% to 20% depending on average size of attacking ships. For example: Smaller ships blowing up bigger ships get a bonus or bigger ships blowing up smaller ships get a penalty. Applied after blob penalty.">
+                <span>Ship Size Multiplier: {`${state.shipSizeMultiplier < 1 ? '-' : '+'}${100 - Math.round(state.shipSizeMultiplier * 100)}%`}</span>
               </Tooltip>
               <ul>
                 <li>
