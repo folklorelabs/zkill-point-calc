@@ -3,55 +3,61 @@ import React, {
   useReducer,
   useMemo,
   useContext,
+  useEffect,
 } from 'react';
 import PropTypes from 'prop-types';
 import SHIPS from '../data/ships.json';
 import MODULES from '../data/modules.json';
 
+// UTILS
+export function uuid() {
+  return Math.random().toString(16).slice(2);
+}
+export function parseEft(eft) {
+  const shipNameRegExp = /^\[([\w ]+)/;
+  const shipNameMatch = shipNameRegExp.exec(eft);
+  const shipName = shipNameMatch.length > 1 ? shipNameMatch[1] : null;
+  if (!shipName) throw new Error('Invalid EFT. Cannot parse ship name.');
+  const ship = SHIPS.find((s) => s.name === shipName);
+  if (!ship) throw new Error(`Invalid EFT. Unknown ship ${shipName}.`);
+  const eftLines = eft.split('\n');
+  const eftLinesClean = eftLines
+    .slice(1, eftLines.length - 1)
+    .filter((line) => !!line)
+    .map(line => line.split(',')[0]);
+  const modules = eftLinesClean
+    .map((line) => {
+      const module = MODULES.find(module => module.name === line);
+      return module ? {
+        ...module,
+        uuid: uuid(),
+      } : null;
+    })
+    .filter((module) => !!module);
+  return {
+    ...ship,
+    modules,
+  };
+}
+
 // STATE
 const INITIAL_STATE = {
-  ships: SHIPS,
   victimShip: null,
-  victimModules: [],
-  victimBasePoints: 0,
-  victimDangerFactor: 0,
-  victimTotalPoints: 0,
-  involvedQtyPenalty: 1,
-  involvedSizeMultiplier: 0,
   involvedShips: [],
 };
 
 // ACTIONS
 export const ACTIONS = {
-  INITIALIZE: 'INITIALIZE',
+  RESET: 'RESET',
   LOAD_VICTIM: 'LOAD_VICTIM',
   ADD_INVOLVED: 'ADD_INVOLVED',
   REMOVE_INVOLVED: 'REMOVE_INVOLVED',
 };
 export function reset() {
-  return [ACTIONS.INITIALIZE];
+  return [ACTIONS.RESET];
 }
-export async function loadVictim(victimEft) {
-  const shipNameRegExp = /^\[([\w ]+)/;
-  const shipNameMatch = shipNameRegExp.exec(victimEft);
-  const shipName = shipNameMatch.length > 1 ? shipNameMatch[1] : null;
-  if (!shipName) throw new Error('Invalid EFT. Cannot parse ship name.');
-  const victimShip = SHIPS.find((s) => s.name === shipName);
-  if (!victimShip) throw new Error(`Invalid EFT. Unknown ship ${shipName}.`);
-  const eftLines = victimEft.split('\n');
-  const eftLinesClean = eftLines
-    .slice(1, eftLines.length - 1)
-    .filter((line) => !!line)
-    .map(line => line.split(',')[0]);
-  victimShip.modules = eftLinesClean
-    .map((line) => {
-      const module = MODULES.find(module => module.name === line);
-      return module ? {
-        ...module,
-        uuid: Math.random().toString(16).slice(2),
-      } : null;
-    })
-    .filter((module) => !!module);
+export function loadVictim(victim) {
+  const victimShip = typeof victim === 'string' ? parseEft(victim) : victim;
   return [ACTIONS.LOAD_VICTIM, victimShip];
 }
 export function loadInvolved(shipName) {
@@ -68,7 +74,7 @@ export function unloadInvolved(uuid) {
 // REDUCER
 function REDUCER(state, [type, payload]) {
   switch (type) {
-    case ACTIONS.INITIALIZE:
+    case ACTIONS.RESET:
       return {
         ...state,
         ...INITIAL_STATE,
@@ -85,7 +91,7 @@ function REDUCER(state, [type, payload]) {
           ...state.involvedShips,
           {
             ...payload,
-            uuid: Math.random().toString(16).slice(2),
+            uuid: uuid(),
           },
         ],
       };
@@ -190,6 +196,7 @@ const ZkillPointsContext = createContext({
 export function ZkillPointsProvider({
   children,
 }) {
+  console.log('go');
   const [zkillPointsState, zkillPointsDispatch] = useReducer(REDUCER, INITIAL_STATE);
 
   // wrap value in memo so we only re-render when necessary
@@ -197,6 +204,33 @@ export function ZkillPointsProvider({
     zkillPointsState,
     zkillPointsDispatch,
   }), [zkillPointsState, zkillPointsDispatch]);
+
+  useEffect(() => {
+    console.log('again?');
+    const url = new URL(window.location);
+    const params = url.searchParams;
+    const victimShip = SHIPS.find((s) => s.name === params.get('victimShip'));
+    const victimModulesQuery = params.get('victimModules');
+    const victimModules = victimModulesQuery && victimModulesQuery.split(',')
+      .map((moduleName) => MODULES.find((m) => m.name === moduleName))
+      .filter((module) => !!module)
+      .map((module) => ({
+        ...module,
+        uuid: uuid(),
+      }));
+    if (victimModules && victimModules.length) {
+      zkillPointsDispatch(loadVictim({
+        ...victimShip,
+        modules: victimModules,
+      }));
+    }
+    const involvedShipsQuery = params.get('involvedShips');
+    if (involvedShipsQuery) {
+      involvedShipsQuery.split(',').forEach((shipName) => {
+        zkillPointsDispatch(loadInvolved(shipName));
+      });
+    }
+  }, []);
 
   return (
     <ZkillPointsContext.Provider value={providerValue}>

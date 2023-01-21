@@ -40,6 +40,24 @@ function App() {
     involvedSizeMultiplier: getInvolvedSizeMultiplier(zkillPointsState),
     totalPoints: getTotalPoints(zkillPointsState),
   }), [zkillPointsState]);
+  const url = useMemo(() => {
+    const { victimShip, involvedShips } = zkillPointsState;
+    if (!victimShip) return '';
+    const params = new URLSearchParams();
+    params.append('victimShip', victimShip.name);
+    const victimModuleNames = victimShip.modules && victimShip.modules
+      .filter((m) => m.dangerFactor !== 0)
+      .map((m) => m.name)
+      .join(',');
+    if (victimModuleNames) {
+      params.append('victimModules', victimModuleNames);
+    }
+    const involvedShipNames = involvedShips && involvedShips.map((m) => m.name).join(',');
+    if (involvedShipNames) {
+      params.append('involvedShips', involvedShipNames);
+    }
+    return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+  }, [zkillPointsState]);
   const btnEftHandler = useCallback(async () => {
     const val = txtEftRef.current.value;
     const action = await loadVictim(val);
@@ -124,6 +142,7 @@ function App() {
               </Tooltip>
             </li>
           </ul>
+          <a href={url}>{url.length < 60 ? url : `${url.slice(0, 40)}...${url.slice(url.length - 20, url.length)}`}</a>
         </>
       ) : ''}
       <Divider />
