@@ -50,8 +50,7 @@ const INITIAL_STATE = {
 export const ACTIONS = {
   RESET: 'RESET',
   LOAD_VICTIM: 'LOAD_VICTIM',
-  ADD_INVOLVED: 'ADD_INVOLVED',
-  REMOVE_INVOLVED: 'REMOVE_INVOLVED',
+  LOAD_INVOLVED: 'LOAD_INVOLVED',
 };
 export function reset() {
   return [ACTIONS.RESET];
@@ -60,15 +59,12 @@ export function loadVictim(victim) {
   const victimShip = typeof victim === 'string' ? parseEft(victim) : victim;
   return [ACTIONS.LOAD_VICTIM, victimShip];
 }
-export function loadInvolved(shipName) {
-  const involvedShip = SHIPS.find((s) => `${s.name}` === shipName) || {
-    name: shipName,
-  };
-  return [ACTIONS.ADD_INVOLVED, involvedShip];
-}
-
-export function unloadInvolved(uuid) {
-  return [ACTIONS.REMOVE_INVOLVED, uuid];
+export function loadInvolvedShips(ships) {
+  const involvedShips = ships.map((ship) => ({
+    ...ship,
+    uuid: uuid(),
+  }));
+  return [ACTIONS.LOAD_INVOLVED, involvedShips];
 }
 
 // REDUCER
@@ -94,6 +90,11 @@ function REDUCER(state, [type, payload]) {
             uuid: uuid(),
           },
         ],
+      };
+    case ACTIONS.LOAD_INVOLVED:
+      return {
+        ...state,
+        involvedShips: payload,
       };
     case ACTIONS.REMOVE_INVOLVED:
       return {
@@ -222,11 +223,12 @@ export function ZkillPointsProvider({
         modules: victimModules,
       }));
     }
-    const involvedShipsQuery = params.get('involvedShips');
-    if (involvedShipsQuery) {
-      involvedShipsQuery.split(',').forEach((shipName) => {
-        zkillPointsDispatch(loadInvolved(shipName));
-      });
+    const involvedShips = params.get('involvedShips').split(',')
+      .map((shipName) => SHIPS.find((s) => s.name === shipName))
+      .filter((ship) => !!ship);
+    console.log(involvedShips);
+    if (involvedShips) {
+      zkillPointsDispatch(loadInvolvedShips(involvedShips));
     }
   }, []);
 

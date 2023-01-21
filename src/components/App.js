@@ -5,8 +5,7 @@ import { useCallback,
 import {
   useZkillPointsContext,
   loadVictim,
-  loadInvolved,
-  unloadInvolved,
+  loadInvolvedShips,
   getVictimBasePoints,
   getVictimDangerFactor,
   getInvolvedQtyPenalty,
@@ -24,9 +23,22 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Tooltip from '@mui/material/Tooltip';
 import Divider from '@mui/material/Divider';
+import { styled } from '@mui/system';
 
 import SHIPS from '../data/ships.json';
 import './App.css';
+
+const GroupHeader = styled('div')(({ theme }) => ({
+  position: 'sticky',
+  top: '-8px',
+  padding: '4px 10px',
+  color: '#1976db',
+  backgroundColor: '#e2f1fd',
+}));
+
+const GroupItems = styled('ul')({
+  padding: 0,
+});
 
 function App() {
   const txtEftRef = useRef();
@@ -63,13 +75,6 @@ function App() {
     const action = await loadVictim(val);
     zkillPointsDispatch(action);
   }, [zkillPointsDispatch]);
-  const btnAttackerAddHandler = useCallback((newValue) => {
-    const val = typeof newValue === 'string' ? newValue : selInvolvedRef.current.value;
-    zkillPointsDispatch(loadInvolved(val));
-  }, [zkillPointsDispatch]);
-  const btnAttackerRemoveHandler = useCallback((uuid) => {
-    zkillPointsDispatch(unloadInvolved(uuid));
-  }, [zkillPointsDispatch]);
   const averageAttackerSize = useMemo(() => {
     const attackerShips = zkillPointsState.involvedShips;
     return Math.max(1, attackerShips.reduce((total, ship) => {
@@ -101,24 +106,28 @@ function App() {
         <FormControl sx={{ m: 1, minWidth: 320 }} size="small">
           <Autocomplete
             id="attacker-select"
+            multiple
+            limitTags={2}
             options={SHIPS.sort((a, b) => `${a.rigSize} ${a.group}`.localeCompare(`${b.rigSize} ${b.group}`))}
+            value={zkillPointsState.involvedShips}
+            isOptionEqualToValue={(option, value) => false}
             groupBy={(option) => `${option.group} (${Math.pow(5, option.rigSize)} points)`}
             getOptionLabel={(option) => option.name}
             sx={{ width: 300 }}
             renderInput={(params) => <TextField {...params} inputRef={selInvolvedRef} label="Ship" variant="standard" />}
-            // onChange={(event, newValue) => {
-              //   if (!newValue || !newValue.name) return;
-              //   btnAttackerAddHandler(newValue.name);
-              //   event.target.value = '';
-              // }}
-              clearOnEscape
-              />
+            renderGroup={(params) => (
+              <li>
+                <GroupHeader>{params.group}</GroupHeader>
+                <GroupItems>{params.children}</GroupItems>
+              </li>
+            )}
+            clearOnEscape
+            onChange={(event, newValue) => {
+              console.log(newValue);
+              zkillPointsDispatch(loadInvolvedShips(newValue));
+            }}
+          />
         </FormControl>
-        <div>
-          <Button
-            onClick={btnAttackerAddHandler}
-            >Add attacker</Button>
-        </div>
       </div>
       {state.victimShip ? (
         <>
@@ -185,13 +194,6 @@ function App() {
                         <Tooltip title={ship.name === 'Capsule' ? 'Capsules are equal to victim ship rig size + 1.' : `Determined by rig slot size (5 ^ ${ship.rigSize})`}>
                           <span>{ship.name} ({ship.name === 'Capsule' ? Math.pow(5, state.victimShip.rigSize + 1) : Math.pow(5, ship.rigSize)} points)</span>
                         </Tooltip>
-                        <IconButton
-                          aria-label="delete"
-                          size="small"
-                          onClick={() => btnAttackerRemoveHandler(ship.uuid)}
-                        >
-                          <DeleteIcon fontSize="inherit" />
-                        </IconButton>
                       </li>
                     ))}
                   </ul>
