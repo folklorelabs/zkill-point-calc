@@ -196,7 +196,6 @@ const ZkillPointsContext = createContext({
 export function ZkillPointsProvider({
   children,
 }) {
-  console.log('go');
   const [zkillPointsState, zkillPointsDispatch] = useReducer(REDUCER, INITIAL_STATE);
 
   // wrap value in memo so we only re-render when necessary
@@ -206,7 +205,6 @@ export function ZkillPointsProvider({
   }), [zkillPointsState, zkillPointsDispatch]);
 
   useEffect(() => {
-    console.log('again?');
     const url = new URL(window.location);
     const params = url.searchParams;
     const victimShip = SHIPS.find((s) => s.name === params.get('victimShip'));
