@@ -19,8 +19,6 @@ import FormControl from '@mui/material/FormControl';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
 import Tooltip from '@mui/material/Tooltip';
 import Divider from '@mui/material/Divider';
 import { styled } from '@mui/system';
@@ -123,7 +121,6 @@ function App() {
             )}
             clearOnEscape
             onChange={(event, newValue) => {
-              console.log(newValue);
               zkillPointsDispatch(loadInvolvedShips(newValue));
             }}
           />
