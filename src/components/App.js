@@ -18,6 +18,7 @@ import FormControl from '@mui/material/FormControl';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
+import Chip from '@mui/material/Chip';
 import { styled } from '@mui/system';
 
 import Item from './Item';
@@ -37,16 +38,30 @@ const GroupItems = styled('ul')({
   padding: 0,
 });
 
-function ShipIconText({ ship }) {
+function ShipIconOption({ ship, ...params }) {
   return (
-    <div className="ShipIconText">
+    <li className="ShipIconOption" {...params}>
       <img
-        className="ShipIconText-image"
-        src={`https://images.evetech.net/types/${ship.id}/icon?size=32`}
+        className="ShipIconOption-image"
+        src={`https://images.evetech.net/types/${ship.id === 'Rat' ? '30193' : ship.id}/icon?size=32`}
         alt=""
       />
       <span>{ship.name}</span>
-    </div>
+    </li>
+  );
+}
+
+function ShipIconChip({ ship, ...params }) {
+  return (
+    <Chip
+      avatar={(<img
+        className="ShipIconChip-image"
+        src={`https://images.evetech.net/types/${ship.id === 'Rat' ? '30193' : ship.id}/icon?size=32`}
+        alt=""
+      />)}
+      label={ship.name}
+      {...params}
+    />
   );
 }
 
@@ -118,11 +133,13 @@ function App() {
             value={zkillPointsState.attackers}
             isOptionEqualToValue={(option, value) => false}
             groupBy={(option) => `${option.group} (${Math.pow(5, option.rigSize)} points)`}
-            getOptionLabel={(option) => (<ShipIconText ship={option} />)}
+            getOptionLabel={(option) => option.name}
             sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label="Attacker Ships" variant="standard" />}
+            renderInput={(params) => <TextField label="Attacker Ships" variant="standard" {...params} />}
+            renderTags={(tagValue, getTagProps) => (tagValue.map((option, index) => <ShipIconChip key={option.id} ship={option} {...getTagProps({ index })} />))}
+            renderOption={(params, option) => (<ShipIconOption key={option.id} ship={option} {...params} />)}
             renderGroup={(params) => (
-              <li>
+              <li key={params.group}>
                 <GroupHeader>{params.group}</GroupHeader>
                 <GroupItems>{params.children}</GroupItems>
               </li>

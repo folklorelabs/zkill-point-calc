@@ -20,19 +20,19 @@
   color: rgba(0, 0, 0, 0.6)
 }
 
-.ShipIconText {
+.ShipIconOption {
   display: flex;
   align-items: center;
 }
 
-.ShipIconText-image {
-  width: 2em;
-  margin-right: 0.5em;
+.ShipIconOption-image {
+  width: 1.5em;
+  margin-right: 0.25em;
 }
 
-.MuiChip-label .ShipIconText-image {
+.ShipIconChip-image {
+  width: 2em;
   border-radius: 100%;
-  margin-left: -8px;
 }
 
 .Controls {
