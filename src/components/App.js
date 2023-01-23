@@ -38,10 +38,11 @@ const GroupItems = styled('ul')({
   padding: 0,
 });
 
-function ShipIconOption({ ship, ...params }) {
+function ShipIconOption({ ship, className, ...params }) {
   return (
-    <li className="ShipIconOption" {...params}>
+    <li className={`ShipIconOption ${className}`} {...params}>
       <img
+        loading="lazy"
         className="ShipIconOption-image"
         src={`https://images.evetech.net/types/${ship.id === 'Rat' ? '30193' : ship.id}/icon?size=32`}
         alt=""
@@ -115,7 +116,7 @@ function App() {
         <FormControl sx={{ m: 1, minWidth: 320 }}>
           <TextField
             id="eft-input"
-            label="Victim Fit (EFT)"
+            label="Victim Fit (EFT Format)"
             multiline
             maxRows={15}
             variant="standard"
@@ -135,6 +136,12 @@ function App() {
             groupBy={(option) => `${option.group} (${Math.pow(5, option.rigSize)} points)`}
             getOptionLabel={(option) => option.name}
             sx={{ width: 300 }}
+            slotProps={{
+              style: {
+                padding: 0,
+                margin: 0,
+              }
+           }}
             renderInput={(params) => <TextField label="Attacker Ships" variant="standard" {...params} />}
             renderTags={(tagValue, getTagProps) => (tagValue.map((option, index) => <ShipIconChip key={option.id} ship={option} {...getTagProps({ index })} />))}
             renderOption={(params, option) => (<ShipIconOption key={option.id} ship={option} {...params} />)}

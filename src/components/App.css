@@ -21,8 +21,8 @@
 }
 
 .ShipIconOption {
-  display: flex;
-  align-items: center;
+  padding: 0;
+  margin: 0;
 }
 
 .ShipIconOption-image {
