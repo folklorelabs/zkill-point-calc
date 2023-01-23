@@ -202,7 +202,7 @@ function App() {
                     itemImageSrc={`https://images.evetech.net/alliances/1354830081/logo?size=64`}
                     itemName="Blob Penalty"
                     itemTooltip="Reduces points exponentially based on the number of attackers."
-                    itemText={`${(1 / state.blobPenalty) < 1 ? '-' : '+'}${100 - Math.round(1 / state.blobPenalty * 100)}%`}
+                    itemText={`${Math.round(1 / state.blobPenalty * 100) - 100}%`}
                   />
                 </li>
                 <li className="ItemList-item">
