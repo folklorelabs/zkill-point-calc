@@ -212,7 +212,22 @@ function App() {
                     itemTooltip="Apply a bonus/penalty from -50% to 20% depending on average size of attacking ships. For example: Smaller ships blowing up bigger ships get a bonus or bigger ships blowing up smaller ships get a penalty. Applied after blob penalty."
                     itemText={`${state.shipSizeMultiplier >= 0 ? '+' : ''}${state.shipSizeMultiplier}%`}
                   />
-                  {zkillPointsState.attackers.length ? (
+                  <ul className="ItemList">
+                    {zkillPointsState.attackers.map((ship) => (
+                      <li
+                        className="ItemList-item"
+                        key={ship.uuid}
+                      >
+                        <Item
+                          itemImageSrc={`https://images.evetech.net/types/${ship.id === 'Rat' ? '30193' : ship.id}/render?size=64`}
+                          itemName={ship.name}
+                          itemTooltip={ship.name === 'Capsule' ? `Capsules are a special case. Point value is based on the victim ship's rig slot size + 1 (${state.shipInfo.rigSize + 1}). Calculation is (5 ^ (victimRigSlotSize + 1)).` : `Point value is based on the ship's rig slot size (${ship.rigSize}). Calculation is (5 ^ rigSlotSize).`}
+                          itemText={`${ship.name === 'Capsule' ? Math.pow(5, state.shipInfo.rigSize + 1) : Math.pow(5, ship.rigSize)} points`}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                  {/* {zkillPointsState.attackers.length ? (
                     <ul className="ItemList">
                       <li className="ItemList-item">
                         <Item
@@ -221,24 +236,10 @@ function App() {
                           itemTooltip="Average ship size of all attacking ships. Based on rig size for direct comparison to victim ship."
                           itemText={`~${Math.round(averageAttackerSize)} points`}
                         />
-                        <ul className="ItemList">
-                          {zkillPointsState.attackers.map((ship) => (
-                            <li
-                              className="ItemList-item"
-                              key={ship.uuid}
-                            >
-                              <Item
-                                itemImageSrc={`https://images.evetech.net/types/${ship.id === 'Rat' ? '30193' : ship.id}/render?size=64`}
-                                itemName={ship.name}
-                                itemTooltip={ship.name === 'Capsule' ? `Capsules are a special case. Point value is based on the victim ship's rig slot size + 1 (${state.shipInfo.rigSize + 1}). Calculation is (5 ^ (victimRigSlotSize + 1)).` : `Point value is based on the ship's rig slot size (${ship.rigSize}). Calculation is (5 ^ rigSlotSize).`}
-                                itemText={`${ship.name === 'Capsule' ? Math.pow(5, state.shipInfo.rigSize + 1) : Math.pow(5, ship.rigSize)} points`}
-                              />
-                            </li>
-                          ))}
-                        </ul>
+                        
                       </li>
                     </ul>
-                  ) : ''}
+                  ) : ''} */}
                 </li>
               </ul>
             </div>
