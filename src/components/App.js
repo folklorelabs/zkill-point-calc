@@ -28,14 +28,27 @@ import './App.css';
 const GroupHeader = styled('div')(({ theme }) => ({
   position: 'sticky',
   top: '-8px',
-  padding: '4px 10px',
-  color: '#1976db',
-  backgroundColor: '#e2f1fd',
+  padding: '0.4em 1em',
+  color: '#000000de',
+  backgroundColor: '#ebebeb',
 }));
 
 const GroupItems = styled('ul')({
   padding: 0,
 });
+
+function ShipIconText({ ship }) {
+  return (
+    <div className="ShipIconText">
+      <img
+        className="ShipIconText-image"
+        src={`https://images.evetech.net/types/${ship.id}/icon?size=32`}
+        alt=""
+      />
+      <span>{ship.name}</span>
+    </div>
+  );
+}
 
 function App() {
   const { zkillPointsState, zkillPointsDispatch } = useZkillPointsContext();
@@ -70,12 +83,12 @@ function App() {
       ...SHIPS,
     ].sort((a, b) => `${a.rigSize} ${a.group}`.localeCompare(`${b.rigSize} ${b.group}`));
   }, []);
-  const averageAttackerSize = useMemo(() => {
-    const attackerShips = zkillPointsState.attackers;
-    return Math.max(1, attackerShips.reduce((total, ship) => {
-      return total + (ship.name === 'Capsule' ? Math.pow(5, zkillPointsState.shipInfo.rigSize + 1) : Math.pow(5, ship.rigSize));
-    }, 0) / attackerShips.length);
-  }, [zkillPointsState]);
+  // const averageAttackerSize = useMemo(() => {
+  //   const attackerShips = zkillPointsState.attackers;
+  //   return Math.max(1, attackerShips.reduce((total, ship) => {
+  //     return total + (ship.name === 'Capsule' ? Math.pow(5, zkillPointsState.shipInfo.rigSize + 1) : Math.pow(5, ship.rigSize));
+  //   }, 0) / attackerShips.length);
+  // }, [zkillPointsState]);
   
   return (
     <Box sx={{ width: '100%', margin: '0 auto', textAlign: 'center' }}>
@@ -105,7 +118,7 @@ function App() {
             value={zkillPointsState.attackers}
             isOptionEqualToValue={(option, value) => false}
             groupBy={(option) => `${option.group} (${Math.pow(5, option.rigSize)} points)`}
-            getOptionLabel={(option) => option.name}
+            getOptionLabel={(option) => (<ShipIconText ship={option} />)}
             sx={{ width: 300 }}
             renderInput={(params) => <TextField {...params} label="Attacker Ships" variant="standard" />}
             renderGroup={(params) => (
@@ -148,7 +161,7 @@ function App() {
               <ul className="ItemList">
                 <li className="ItemList-item">
                   <Item
-                    itemImageSrc={`https://images.evetech.net/types/${state.shipInfo.id}/render?size=64`}
+                    itemImageSrc={`https://images.evetech.net/types/${state.shipInfo.id}/icon?size=64`}
                     itemName={state.shipInfo.name}
                     itemTooltip={`Point value is based on the ship's rig slot size (${state.shipInfo.rigSize}). Calculation is (5 ^ rigSlotSize).`}
                     itemText={`${state.basePoints} points`}
@@ -219,7 +232,7 @@ function App() {
                         key={ship.uuid}
                       >
                         <Item
-                          itemImageSrc={`https://images.evetech.net/types/${ship.id === 'Rat' ? '30193' : ship.id}/render?size=64`}
+                          itemImageSrc={`https://images.evetech.net/types/${ship.id === 'Rat' ? '30193' : ship.id}/icon?size=64`}
                           itemName={ship.name}
                           itemTooltip={ship.name === 'Capsule' ? `Capsules are a special case. Point value is based on the victim ship's rig slot size + 1 (${state.shipInfo.rigSize + 1}). Calculation is (5 ^ (victimRigSlotSize + 1)).` : `Point value is based on the ship's rig slot size (${ship.rigSize}). Calculation is (5 ^ rigSlotSize).`}
                           itemText={`${ship.name === 'Capsule' ? Math.pow(5, state.shipInfo.rigSize + 1) : Math.pow(5, ship.rigSize)} points`}
