@@ -242,7 +242,7 @@ function App() {
                   <Item
                     itemImageSrc={`https://images.evetech.net/types/28837/icon?size=64`}
                     itemName="Seal Clubbing Penalty"
-                    itemTooltip="Apply a substantial penalty if the victim's danger rating is less than 4. Non-pvp ship, empty ships, etc are worth much less."
+                    itemTooltip="A penalty from -0% to -99% increasing inversely proportional to the victim's danger rating. Non-pvp ship, empty ships, etc are worth much less. Penalty is only applied to ships with a danger factor less than 4."
                     itemText={`${state.sealClubbingPenalty ? `${state.sealClubbingPenalty}%` : '--'}`}
                   />
                 </li>
@@ -250,7 +250,7 @@ function App() {
                   <Item
                     itemImageSrc={`https://images.evetech.net/alliances/1354830081/logo?size=64`}
                     itemName="Blob Penalty"
-                    itemTooltip="Reduces points exponentially based on the number of attackers. Applied after Seal Clubbing Penalty."
+                    itemTooltip="A penalty from -0% to -99.9999...% based on the number of attackers. Starts at -0% for solo, -50% for two, -78% for three, -87% for four, etc. Penalty is applied after Seal Clubbing Penalty."
                     itemText={`${state.blobPenalty ? `${state.blobPenalty}%` : '--'}`}
                   />
                 </li>
@@ -258,7 +258,7 @@ function App() {
                   <Item
                     itemImageSrc={`https://images.evetech.net/types/40348/icon?size=64`}
                     itemName="Ship Size Multiplier"
-                    itemTooltip="Apply a bonus/penalty from -50% to 20% depending on average size of attacking ships. For example: Smaller ships blowing up bigger ships get a bonus or bigger ships blowing up smaller ships get a penalty. Applied after blob penalty."
+                    itemTooltip="A bonus/penalty from -50% to 20% depending on average size of attacking ships. For example: Smaller ships blowing up bigger ships get a bonus or bigger ships blowing up smaller ships get a penalty. Penalty is applied after blob penalty."
                     itemText={`${state.shipSizeMultiplier > 0 ? `+${state.shipSizeMultiplier}%` : state.shipSizeMultiplier < 0 ? `${state.shipSizeMultiplier}%` : '--'}`}
                   />
                   <ul className="ItemList">
