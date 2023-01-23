@@ -242,7 +242,7 @@ function App() {
                   <Item
                     itemImageSrc={`https://images.evetech.net/types/28837/icon?size=64`}
                     itemName="Seal Clubbing Penalty"
-                    itemTooltip="Apply a penalty if the victim's danger rating is low. Non-pvp, empty ships, etc are worth much less."
+                    itemTooltip="Apply a substantial penalty if the victim's danger rating is less than 4. Non-pvp ship, empty ships, etc are worth much less."
                     itemText={`${state.sealClubbingPenalty ? `${state.sealClubbingPenalty}%` : '--'}`}
                   />
                 </li>
@@ -250,7 +250,7 @@ function App() {
                   <Item
                     itemImageSrc={`https://images.evetech.net/alliances/1354830081/logo?size=64`}
                     itemName="Blob Penalty"
-                    itemTooltip="Reduces points exponentially based on the number of attackers."
+                    itemTooltip="Reduces points exponentially based on the number of attackers. Applied after Seal Clubbing Penalty."
                     itemText={`${state.blobPenalty ? `${state.blobPenalty}%` : '--'}`}
                   />
                 </li>
