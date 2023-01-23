@@ -17,9 +17,10 @@ import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
-import Tooltip from '@mui/material/Tooltip';
 import Divider from '@mui/material/Divider';
 import { styled } from '@mui/system';
+
+import Item from './Item';
 
 import SHIPS from '../data/ships.json';
 import './App.css';
@@ -43,7 +44,7 @@ function App() {
     basePoints: getBasePoints(zkillPointsState),
     dangerFactor: getDangerFactor(zkillPointsState),
     blobPenalty: getBlobPenalty(zkillPointsState),
-    shipSizeMultiplier: getShipSizeMultiplier(zkillPointsState),
+    shipSizeMultiplier: Math.round(getShipSizeMultiplier(zkillPointsState) * 100) - 100,
     totalPoints: getTotalPoints(zkillPointsState),
   }), [zkillPointsState]);
   const url = useMemo(() => {
@@ -77,15 +78,16 @@ function App() {
   }, [zkillPointsState]);
   
   return (
-    <Box sx={{ width: '100%', maxWidth: 500, margin: '0 auto' }}>
-      <Typography variant="h4" gutterBottom sx={{ textAlign: 'center' }}>
-        Zkill Point Appraisal
-      </Typography>
-      <div style={{ textAlign: 'center' }}>
-        <FormControl sx={{ m: 1, minWidth: 320 }} size="small">
+    <Box sx={{ width: '100%', margin: '0 auto', textAlign: 'center' }}>
+      <div className="App-header">
+        <h1 className="App-headline">Zkill Simulator</h1>
+        <p className="App-tagline">"What's the <em>point</em> of this anyway?"</p>
+      </div>
+      <div className="Controls">
+        <FormControl sx={{ m: 1, minWidth: 320 }}>
           <TextField
             id="eft-input"
-            label="EFT"
+            label="Victim Fit (EFT)"
             multiline
             maxRows={15}
             variant="standard"
@@ -94,7 +96,7 @@ function App() {
             }}
           />
         </FormControl>
-        <FormControl sx={{ m: 1, minWidth: 320 }} size="small">
+        <FormControl sx={{ m: 1, minWidth: 320 }}>
           <Autocomplete
             id="attacker-select"
             multiple
@@ -105,7 +107,7 @@ function App() {
             groupBy={(option) => `${option.group} (${Math.pow(5, option.rigSize)} points)`}
             getOptionLabel={(option) => option.name}
             sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label="Ship" variant="standard" />}
+            renderInput={(params) => <TextField {...params} label="Attacker Ships" variant="standard" />}
             renderGroup={(params) => (
               <li>
                 <GroupHeader>{params.group}</GroupHeader>
@@ -118,85 +120,129 @@ function App() {
             }}
           />
         </FormControl>
+        <p className="App-instructions">
+          This is a tool for simulating the point value of <a href="https://zkillboard.com/" target="_blank" rel="noreferrer">zkillboard</a> killmails.
+          Add an <a href="https://www.eveonline.com/news/view/import-export-fittings" target="_blank" rel="noreferrer">EFT formatted fit</a> and select some ships above to get started.
+        </p>
       </div>
       {state.shipInfo ? (
         <>
           <Divider sx={{ margin: '3em 0' }} />
-          <Typography variant="h2" gutterBottom sx={{ textAlign: 'center' }}>
+          <Typography variant="h3" gutterBottom sx={{ textAlign: 'center' }}>
             {state.totalPoints} Points
           </Typography>
-          <Typography variant="h5" gutterBottom>
-            Victim Breakdown
-          </Typography>
-          <ul>
-            <li>
-              <Tooltip title={`Point value is based on the ship's rig slot size (${state.shipInfo.rigSize}). Calculation is (5 ^ rigSlotSize).`}>
-                <span>{state.shipInfo.name} ({state.basePoints} points)</span>
-              </Tooltip>
-            </li>
-            <li>
-              <Tooltip title={`The sum of all fitted "dangerous" modules flagged as a High Slot, Mid Slot, Low Slot, or SubSystem at time of death. Modules are considered "dangerous" if they are a Drone Damage mod or if they can be overheated. Likewise, Mining Lasers actually reduce this value.`}>
-                <span>Danger Factor ({state.dangerFactor} points)</span>
-              </Tooltip>
-              <ul>
-                {state.shipInfo.modules.map((module, i) => (
-                  <li
-                    key={module.uuid}
-                    value={module.id}
-                    style={{ opacity: module.dangerFactor === 0 ? 0.5 : 1 }}
-                  >
-                    <Tooltip title={`This module ${module.dangerFactor === 0 ? 'is not factored into point tally.' : ''} ${module.hasHeat ? 'is factored into point tally because it has heat damage.' : ''}${module.isDroneMod ? 'is factored into point tally because it is a drone damage mod.' : ''}${module.isMiningMod ? 'is factored into point tally because it is a mining harvester.' : ''}${module.hasHeat || module.isDroneMod || module.isMiningMod ? ` Point value is based on the module's meta level (${module.metaLevel}). Calculation is 1 + floor(metaLevel / 2)).` : ''}`}>
-                      <span>{module.name} ({module.dangerFactor} points)</span>
-                    </Tooltip>
-                  </li>
-                ))}
-                <li style={{ opacity: 0.5 }}>
-                  <Tooltip title="Cargo items are ignored in tally.">
-                    <span>Cargo Items (0 points)</span>
-                  </Tooltip>
+          <p style={{ textAlign: 'center' }}>
+            <a
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {url.length < 60 ? url : `${url.slice(0, 40)}...${url.slice(url.length - 20, url.length)}`}
+            </a>
+          </p>
+          <div className="PointBreakdown">
+            <div className="PointBreakdown-victim">
+              <h2 className="PointBreakdown-headline">
+                Victim Breakdown
+              </h2>
+              <ul className="ItemList">
+                <li className="ItemList-item">
+                  <Item
+                    itemImageSrc={`https://images.evetech.net/types/${state.shipInfo.id}/render?size=64`}
+                    itemName={state.shipInfo.name}
+                    itemTooltip={`Point value is based on the ship's rig slot size (${state.shipInfo.rigSize}). Calculation is (5 ^ rigSlotSize).`}
+                    itemText={`${state.basePoints} points`}
+                  />
                 </li>
-              </ul>
-            </li>
-          </ul>
-          <Typography variant="h5" gutterBottom>
-            Attacker Breakdown
-          </Typography>
-          <ul>
-            <li>
-              <Tooltip title="Reduces points exponentially based on the number of attackers.">
-                <span>Blob Multiplier Penalty: {`${1 / state.blobPenalty < 1 ? '-' : '+'}${100 - Math.round(1 / state.blobPenalty * 100)}%`}</span>
-              </Tooltip>
-            </li>
-            <li>
-              <Tooltip title="Apply a bonus/penalty from -50% to 20% depending on average size of attacking ships. For example: Smaller ships blowing up bigger ships get a bonus or bigger ships blowing up smaller ships get a penalty. Applied after blob penalty.">
-                <span>Ship Size Multiplier: {`${state.shipSizeMultiplier < 1 ? '-' : '+'}${100 - Math.round(state.shipSizeMultiplier * 100)}%`}</span>
-              </Tooltip>
-              <ul>
+                <li className="ItemList-item">
+                  <Item
+                    itemImageSrc={`https://images.evetech.net/types/23740/icon?size=64`}
+                    itemName="Danger Factor"
+                    itemTooltip={`The sum of all fitted "dangerous" modules flagged as a High Slot, Mid Slot, Low Slot, or SubSystem at time of death. Modules are considered "dangerous" if they are a Drone Damage mod or if they can be overheated. Likewise, Mining Lasers actually reduce this value.`}
+                    itemText={`${state.dangerFactor} points`}
+                  />
+                </li>
                 <li>
-                <Tooltip title="Average ship size of all attacking ships. Based on rig size for direct comparison to victim ship.">
-                  <span>Average: {averageAttackerSize}</span>
-                </Tooltip>
-                  <ul>
-                    {zkillPointsState.attackers.map((ship) => (
+                  <ul className="ItemList">
+                    {state.shipInfo.modules.sort((a, b) => b.dangerFactor - a.dangerFactor).map((module, i) => (
                       <li
-                        key={ship.uuid}
+                        className="ItemList-item"
+                        key={module.uuid}
                       >
-                        <Tooltip title={ship.name === 'Capsule' ? `Capsules are a special case. Point value is based on the victim ship's rig slot size + 1 (${state.shipInfo.rigSize + 1}). Calculation is (5 ^ (victimRigSlotSize + 1)).` : `Point value is based on the ship's rig slot size (${ship.rigSize}). Calculation is (5 ^ rigSlotSize).`}>
-                          <span>{ship.name} ({ship.name === 'Capsule' ? Math.pow(5, state.shipInfo.rigSize + 1) : Math.pow(5, ship.rigSize)} points)</span>
-                        </Tooltip>
+                        <Item
+                          key={module.uuid}
+                          itemImageSrc={`https://images.evetech.net/types/${module.id}/icon?size=64`}
+                          itemName={module.name}
+                          itemTooltip={`This module ${module.dangerFactor === 0 ? 'is not factored into point tally.' : ''} ${module.hasHeat ? 'is factored into point tally because it has heat damage.' : ''}${module.isDroneMod ? 'is factored into point tally because it is a drone damage mod.' : ''}${module.isMiningMod ? 'is factored into point tally because it is a mining harvester.' : ''}${module.hasHeat || module.isDroneMod || module.isMiningMod ? ` Point value is based on the module's meta level (${module.metaLevel}). Calculation is 1 + floor(metaLevel / 2)).` : ''}`}
+                          itemText={`${module.dangerFactor} points`}
+                          demphasized={module.dangerFactor === 0}
+                        />
                       </li>
                     ))}
+                    <li className="ItemList-item">
+                      <Item
+                        itemImageSrc="https://images.evetech.net/types/1317/icon?size=64"
+                        itemName="Cargo Items"
+                        itemTooltip="Cargo items are ignored in tally."
+                        itemText="0 points"
+                        demphasized={true}
+                      />
+                    </li>
                   </ul>
                 </li>
               </ul>
-            </li>
-          </ul>
-          <Typography variant="h5" gutterBottom>
-            Static URL
-          </Typography>
-          <p>
-            <a href={url}>{url.length < 60 ? url : `${url.slice(0, 40)}...${url.slice(url.length - 20, url.length)}`}</a>
-          </p>
+            </div>
+            <div className="PointBreakdown-attacker">
+              <h2 className="PointBreakdown-headline">
+                Attacker Breakdown
+              </h2>
+              <ul className="ItemList">
+                <li className="ItemList-item">
+                  <Item
+                    itemImageSrc={`https://images.evetech.net/alliances/1354830081/logo?size=64`}
+                    itemName="Blob Penalty"
+                    itemTooltip="Reduces points exponentially based on the number of attackers."
+                    itemText={`${(1 / state.blobPenalty) < 1 ? '-' : '+'}${100 - Math.round(1 / state.blobPenalty * 100)}%`}
+                  />
+                </li>
+                <li className="ItemList-item">
+                  <Item
+                    itemImageSrc={`https://images.evetech.net/types/40348/icon?size=64`}
+                    itemName="Ship Size Multiplier"
+                    itemTooltip="Apply a bonus/penalty from -50% to 20% depending on average size of attacking ships. For example: Smaller ships blowing up bigger ships get a bonus or bigger ships blowing up smaller ships get a penalty. Applied after blob penalty."
+                    itemText={`${state.shipSizeMultiplier >= 0 ? '+' : ''}${state.shipSizeMultiplier}%`}
+                  />
+                  {zkillPointsState.attackers.length ? (
+                    <ul className="ItemList">
+                      <li className="ItemList-item">
+                        <Item
+                          itemImageSrc={`https://images.evetech.net/types/24698/icon?size=64`}
+                          itemName="Ship Average "
+                          itemTooltip="Average ship size of all attacking ships. Based on rig size for direct comparison to victim ship."
+                          itemText={`~${Math.round(averageAttackerSize)} points`}
+                        />
+                        <ul className="ItemList">
+                          {zkillPointsState.attackers.map((ship) => (
+                            <li
+                              className="ItemList-item"
+                              key={ship.uuid}
+                            >
+                              <Item
+                                itemImageSrc={`https://images.evetech.net/types/${ship.id === 'Rat' ? '30193' : ship.id}/render?size=64`}
+                                itemName={ship.name}
+                                itemTooltip={ship.name === 'Capsule' ? `Capsules are a special case. Point value is based on the victim ship's rig slot size + 1 (${state.shipInfo.rigSize + 1}). Calculation is (5 ^ (victimRigSlotSize + 1)).` : `Point value is based on the ship's rig slot size (${ship.rigSize}). Calculation is (5 ^ rigSlotSize).`}
+                                itemText={`${ship.name === 'Capsule' ? Math.pow(5, state.shipInfo.rigSize + 1) : Math.pow(5, ship.rigSize)} points`}
+                              />
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                    </ul>
+                  ) : ''}
+                </li>
+              </ul>
+            </div>
+          </div>
         </>
       ) : ''}
     </Box>

@@ -173,6 +173,7 @@ export function getShipSizeMultiplier(state) {
 export function getTotalPoints(state) {
   if (state.shipInfo && state.shipInfo.group === 'Capsule') return 1;
   if (state.attackers.find((a) => a.group === 'Structure')) return 1;
+  if (state.attackers.length && !state.attackers.reduce((all, a) => all || a.name !== 'Rat', false)) return 1;
 
   const basePoints = getBasePoints(state);
   let points = basePoints;
