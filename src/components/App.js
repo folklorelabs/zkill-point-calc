@@ -68,14 +68,18 @@ function ShipIconChip({ ship, ...params }) {
 
 function App() {
   const { zkillPointsState, zkillPointsDispatch } = useZkillPointsContext();
-  const state = useMemo(() => ({
-    shipInfo: zkillPointsState.shipInfo,
-    basePoints: getBasePoints(zkillPointsState),
-    dangerFactor: getDangerFactor(zkillPointsState),
-    blobPenalty: getBlobPenalty(zkillPointsState),
-    shipSizeMultiplier: Math.round(getShipSizeMultiplier(zkillPointsState) * 100) - 100,
-    totalPoints: getTotalPoints(zkillPointsState),
-  }), [zkillPointsState]);
+  const state = useMemo(() => {
+    const dangerFactor = getDangerFactor(zkillPointsState);
+    return {
+      shipInfo: zkillPointsState.shipInfo,
+      basePoints: getBasePoints(zkillPointsState),
+      dangerFactor,
+      blobPenalty: Math.round(1 / getBlobPenalty(zkillPointsState) * 100) - 100,
+      sealClubbingPenalty: Math.max(0.01, Math.min(1, dangerFactor / 4)) * 100 - 100,
+      shipSizeMultiplier: Math.round(getShipSizeMultiplier(zkillPointsState) * 100) - 100,
+      totalPoints: getTotalPoints(zkillPointsState),
+    };
+  }, [zkillPointsState]);
   const url = useMemo(() => {
     const { shipInfo, attackers } = zkillPointsState;
     if (!shipInfo) return '';
@@ -236,10 +240,18 @@ function App() {
               <ul className="ItemList">
                 <li className="ItemList-item">
                   <Item
+                    itemImageSrc={`https://images.evetech.net/types/28837/icon?size=64`}
+                    itemName="Seal Clubbing Penalty"
+                    itemTooltip="Apply a penalty if the victim's danger rating is low. Non-pvp, empty ships, etc are worth much less."
+                    itemText={`${state.sealClubbingPenalty ? `${state.sealClubbingPenalty}%` : '--'}`}
+                  />
+                </li>
+                <li className="ItemList-item">
+                  <Item
                     itemImageSrc={`https://images.evetech.net/alliances/1354830081/logo?size=64`}
                     itemName="Blob Penalty"
                     itemTooltip="Reduces points exponentially based on the number of attackers."
-                    itemText={`${Math.round(1 / state.blobPenalty * 100) - 100}%`}
+                    itemText={`${state.blobPenalty ? `${state.blobPenalty}%` : '--'}`}
                   />
                 </li>
                 <li className="ItemList-item">
@@ -247,7 +259,7 @@ function App() {
                     itemImageSrc={`https://images.evetech.net/types/40348/icon?size=64`}
                     itemName="Ship Size Multiplier"
                     itemTooltip="Apply a bonus/penalty from -50% to 20% depending on average size of attacking ships. For example: Smaller ships blowing up bigger ships get a bonus or bigger ships blowing up smaller ships get a penalty. Applied after blob penalty."
-                    itemText={`${state.shipSizeMultiplier >= 0 ? '+' : ''}${state.shipSizeMultiplier}%`}
+                    itemText={`${state.shipSizeMultiplier > 0 ? `+${state.shipSizeMultiplier}%` : state.shipSizeMultiplier < 0 ? `${state.shipSizeMultiplier}%` : '--'}`}
                   />
                   <ul className="ItemList">
                     {zkillPointsState.attackers.map((ship) => (
