@@ -159,7 +159,7 @@ function App() {
         </FormControl>
         <p className="App-instructions">
           This is a tool for simulating the point value of <a href="https://zkillboard.com/" target="_blank" rel="noreferrer">zkillboard</a> killmails.
-          Add an <a href="https://www.eveonline.com/news/view/import-export-fittings" target="_blank" rel="noreferrer">EFT formatted fit</a> and select some ships above to get started.
+          Add a ship fit (in <a href="https://www.eveonline.com/news/view/import-export-fittings" target="_blank" rel="noreferrer">EFT format</a>) and select some attacker ships to get started.
         </p>
       </div>
       {state.shipInfo ? (
