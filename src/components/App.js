@@ -184,7 +184,7 @@ function App() {
           <div className="PointBreakdown">
             <div className="PointBreakdown-victim">
               <h2 className="PointBreakdown-headline">
-                Victim Breakdown
+                Point Breakdown
               </h2>
               <ul className="ItemList">
                 <li className="ItemList-item">
@@ -235,7 +235,7 @@ function App() {
             </div>
             <div className="PointBreakdown-attacker">
               <h2 className="PointBreakdown-headline">
-                Attacker Breakdown
+                Modifiers
               </h2>
               <ul className="ItemList">
                 <li className="ItemList-item">
