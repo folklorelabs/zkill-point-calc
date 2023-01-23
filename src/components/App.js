@@ -111,7 +111,7 @@ function App() {
   // }, [zkillPointsState]);
   
   return (
-    <Box sx={{ width: '100%', margin: '0 auto', textAlign: 'center' }}>
+    <Box sx={{ width: '100%', margin: '0 auto', textAlign: 'center', padding: '0 10px', }}>
       <div className="App-header">
         <h1 className="App-headline">Killmail Simulator</h1>
         <p className="App-tagline">"What's the <em>point</em> of this anyway?"</p>
