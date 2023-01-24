@@ -197,13 +197,13 @@ function App() {
             id="attacker-select"
             multiple
             disableCloseOnSelect
-            limitTags={2}
+            limitTags={1}
             options={availableAttackers}
             value={zkillPointsState.attackers}
             isOptionEqualToValue={(option, value) => false}
             groupBy={(option) => `${option.group} (${Math.pow(5, option.rigSize)} points)`}
             getOptionLabel={(option) => option.name}
-            sx={{ width: 300 }}
+            sx={{ width: 320 }}
             slotProps={{
               style: {
                 padding: 0,

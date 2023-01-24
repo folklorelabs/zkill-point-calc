@@ -6,6 +6,10 @@ const THEMES = {
   light: createTheme({
     palette: {
       mode: 'light',
+      background: {
+        paper: 'red',
+        background: 'red',
+      },
     },
   }),
   dark: createTheme({
@@ -22,13 +26,15 @@ const THEMES = {
 const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
 export function ColorModeProvider({ children }) {
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const [mode, setMode] = useState(prefersDarkMode ? 'dark' : 'light');
+  const prefersLightMode = useMediaQuery('(prefers-color-scheme: light)');
+  const [mode, setMode] = useState(prefersLightMode ? 'light' : 'dark');
   const providerValue = useMemo(() => ({
     toggleColorMode: () => {
       setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
     },
   }), []);
+
+  console.log(THEMES.light);
 
   return (
     <ColorModeContext.Provider value={providerValue}>
