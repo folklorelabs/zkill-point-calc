@@ -93,9 +93,9 @@ function App() {
       shipInfo: zkillPointsState.shipInfo,
       basePoints: getBasePoints(zkillPointsState),
       dangerFactor,
-      blobPenalty: Math.round(1 / getBlobPenalty(zkillPointsState) * 100) - 100,
-      snugglyPenalty: Math.max(0.01, Math.min(1, dangerFactor / 4)) * 100 - 100,
-      shipSizeMultiplier: Math.round(getShipSizeMultiplier(zkillPointsState) * 100) - 100,
+      blobPenalty: (Math.round(1 / getBlobPenalty(zkillPointsState) * 1000) - 1000) / 10,
+      snugglyPenalty: (Math.max(0.01, Math.min(1, dangerFactor / 4)) * 1000 - 1000) / 10,
+      shipSizeMultiplier: (Math.round(getShipSizeMultiplier(zkillPointsState) * 1000) - 1000) / 10,
       totalPoints: getTotalPoints(zkillPointsState),
     };
   }, [zkillPointsState]);
