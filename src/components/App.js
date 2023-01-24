@@ -1,7 +1,6 @@
 import {
   useMemo,
 } from 'react';
-import { useColorModeContext } from '../contexts/ColorMode';
 import {
   useZkillPointsContext,
   loadVictim,
@@ -16,14 +15,10 @@ import {
 import { debounce } from 'throttle-debounce';
 import { useSnackbar } from 'notistack';
 
-import { useTheme } from '@mui/material/styles';
-import IconButton from '@mui/material/IconButton';
-import IosShareIcon from '@mui/icons-material/IosShare';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
+import Link from '@mui/material/Link';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
@@ -32,6 +27,7 @@ import Chip from '@mui/material/Chip';
 import { styled, lighten, darken } from '@mui/system';
 
 import Item from './Item';
+import AppToolbar from './AppToolbar';
 
 import SHIPS from '../data/ships.json';
 import  {
@@ -83,8 +79,6 @@ function ShipIconChip({ ship, ...params }) {
 }
 
 function App() {
-  const theme = useTheme();
-  const colorMode = useColorModeContext();
   const { enqueueSnackbar } = useSnackbar();
   const { zkillPointsState, zkillPointsDispatch } = useZkillPointsContext();
   const state = useMemo(() => {
@@ -99,45 +93,6 @@ function App() {
       totalPoints: getTotalPoints(zkillPointsState),
     };
   }, [zkillPointsState]);
-  const url = useMemo(() => {
-    const { shipInfo, attackers } = zkillPointsState;
-    if (!shipInfo) return '';
-    const killmail = [];
-
-    // add ship id to killmail array
-    killmail.push(shipInfo.id);
-
-    // add ship modules to killmail array
-    const shipModulesObj = shipInfo.modules && shipInfo.modules
-      .filter((m) => m.dangerFactor !== 0)
-      .map((m) => m.id)
-      .reduce((all, mId) => {
-        all[mId] = all[mId] ? all[mId] + 1 : 1;
-        return all;
-      }, {});
-    const shipModules = Object.keys(shipModulesObj).map((mId) => {
-      const qty = shipModulesObj[mId];
-      return `${mId}${qty > 1 ? `_${qty}` : ''}`;
-    }).join('.');
-    killmail.push(shipModules);
-
-    // add attackers to killmail array
-    const attackerShipsObj = attackers && attackers.map((s) => s.id)
-      .reduce((all, sId) => {
-        all[sId] = all[sId] ? all[sId] + 1 : 1;
-        return all;
-      }, {});
-    const attackerShips = Object.keys(attackerShipsObj).map((sId) => {
-      const qty = attackerShipsObj[sId];
-      return `${sId}${qty > 1 ? `_${qty}` : ''}`;
-    }).join('.');
-    killmail.push(attackerShips);
-
-    const url = new URL(window.location);
-    url.searchParams.set('k', killmail.join('-'));
-    window.history.replaceState({}, '', url);
-    return `${url}`;
-  }, [zkillPointsState]);
   const availableAttackers = useMemo(() => {
     return [
       ...SHIPS,
@@ -151,23 +106,8 @@ function App() {
   // }, [zkillPointsState]);
   
   return (
-    <Box sx={{ width: '100%', margin: '0 auto', textAlign: 'center', padding: '0 10px', }}>
-      <p style={{ textAlign: 'right' }}>
-        <IconButton
-          sx={{ ml: 1 }}
-          onClick={async (e) => {
-            e.preventDefault();
-            await navigator.clipboard.writeText(url);
-            enqueueSnackbar('Simulation URL copied to clipboard!', { variant: 'success' });
-          }}
-          color="inherit"
-        >
-          {<IosShareIcon />}
-        </IconButton>
-        <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
-          {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-        </IconButton>
-      </p>
+    <Box sx={{ width: '100%', margin: '0 auto', textAlign: 'center', }}>
+      <AppToolbar />
       <div className="App-header">
         <a className="App-headlineLink" href="/">
           <Typography variant="h4" className="App-headline">Killmail Simulator</Typography>
@@ -227,15 +167,15 @@ function App() {
         </FormControl>
         <div className="App-instructions">
           <Typography variant="body2">
-            This is a tool for simulating the point value of <a href="https://zkillboard.com/" target="_blank" rel="noreferrer">zkillboard</a> killmails.
-            Add a ship fit (in <a href="https://www.eveonline.com/news/view/import-export-fittings" target="_blank" rel="noreferrer">EFT format</a>) and select some attacker ships to get started.
+            This is a tool for simulating the point value of <Link href="https://zkillboard.com/" target="_blank" rel="noreferrer">zkillboard</Link> killmails.
+            Add a ship fit (in <Link href="https://www.eveonline.com/news/view/import-export-fittings" target="_blank" rel="noreferrer">EFT format</Link>) and select some attacker ships to get started.
           </Typography>
         </div>
       </div>
       {state.shipInfo ? (
         <>
           <Divider sx={{ margin: '3em 0' }} />
-          <Typography variant="h3" gutterBottom sx={{ textAlign: 'center' }}>
+          <Typography variant="h4" gutterBottom sx={{ textAlign: 'center' }}>
             {state.totalPoints} Points
           </Typography>
           <div className="PointBreakdown">

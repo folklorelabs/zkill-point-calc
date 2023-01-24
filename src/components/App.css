@@ -23,7 +23,7 @@
 .App-instructions {
   max-width: 530px;
   margin: 3em auto 0;
-  opacity: 0.75;
+  /* opacity: 0.75; */
 }
 
 .ShipIconOption {

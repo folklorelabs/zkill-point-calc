@@ -6,10 +6,21 @@ import CssBaseline from '@mui/material/CssBaseline';
 const THEMES = {
   light: createTheme({
     palette: {
-      mode: 'light',
       background: {
-        paper: '#fefefe',
-        background: '#fefefe',
+        default: '#f9f9f9',
+        paper: '#fff',
+      },
+      primary: {
+        main: '#1c6f95',
+      },
+      error: {
+        main: '#f00',
+      },
+      // info: {
+      //   main: '#2a9fd6',
+      // },
+      success: {
+        main: '#008000',
       },
     },
   }),
@@ -17,8 +28,20 @@ const THEMES = {
     palette: {
       mode: 'dark',
       background: {
-        paper: '#020202',
-        background: '#020202',
+        default: '#111111',
+        paper: '#000000',
+      },
+      primary: {
+        main: '#2a9fd6',
+      },
+      success: {
+        main: '#008000',
+      },
+      error: {
+        main: '#f00',
+      },
+      warning: {
+        main: '#fcc204',
       },
     },
   }),
@@ -35,8 +58,6 @@ export function ColorModeProvider({ children }) {
       setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
     },
   }), []);
-
-  console.log(THEMES.light);
 
   return (
     <ColorModeContext.Provider value={providerValue}>
