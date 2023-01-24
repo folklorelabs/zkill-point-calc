@@ -1,10 +1,9 @@
 import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
 import {
     Container,
     InnerWrapper,
     TextWrapper,
-    TextPrimary,
-    TextSecondary,
     ImageItem,
 } from './Item.styles.js';
 
@@ -25,8 +24,8 @@ function Item({
                         alt={itemName}
                     />
                     <TextWrapper>
-                        <TextPrimary>{itemName}</TextPrimary>
-                        <TextSecondary>{itemText}</TextSecondary>
+                        <Typography variant="button" mx={{ lineHeight: '1.333', marginBottom: '0.1em', }}>{itemName}</Typography>
+                        <Typography variant="overline" mx={{ lineHeight: '1.333' }}>{itemText}</Typography>
                     </TextWrapper>
                 </InnerWrapper>
             </Tooltip>

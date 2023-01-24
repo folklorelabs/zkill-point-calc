@@ -14,6 +14,7 @@
 .App-headline {
   margin: 0;
   padding: 0;
+  font-size: 2em;
 }
 .App-tagline {
   margin: 0;
@@ -22,7 +23,8 @@
 .App-instructions {
   max-width: 530px;
   margin: 3em auto 0;
-  color: rgba(0, 0, 0, 0.6)
+  opacity: 0.6;
+  /* color: rgba(0, 0, 0, 0.6) */
 }
 
 .ShipIconOption {
@@ -75,31 +77,10 @@
   font-size: 1.5rem;
   line-height: 1.334;
   letter-spacing: 0em;
-  padding-bottom: 0.45em;
   text-align: center;
-  border-bottom-style: solid;
-  border-bottom-width: 1px;
-  border-color: rgba(0, 0, 0, 0.1);
 }
 .ItemList .ItemList-item {
   position: relative;
   padding: 1em 0 0;
 }
 
-.ItemList .ItemList {
-  margin-left: 1.2em;
-  padding-left: 1.2em;
-  border-bottom: none;
-  border-left-style: solid;
-  border-left-width: 1px;
-  border-image: 
-    linear-gradient(
-      to bottom, 
-      rgba(0, 0, 0, 0.1),
-      rgba(0, 0, 0, 0.1) 75%,
-      rgba(0, 0, 0, 0)
-    ) 1 100%;
-}
-.ItemList .ItemList .ItemList-item {
-  position: relative;
-}

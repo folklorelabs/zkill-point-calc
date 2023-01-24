@@ -1,6 +1,7 @@
 import {
   useMemo,
 } from 'react';
+import { useColorModeContext } from '../contexts/ColorMode';
 import {
   useZkillPointsContext,
   loadVictim,
@@ -15,8 +16,12 @@ import {
 import { debounce } from 'throttle-debounce';
 import { useSnackbar } from 'notistack';
 
+import { useTheme } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
+import IosShareIcon from '@mui/icons-material/IosShare';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -24,19 +29,25 @@ import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 import Chip from '@mui/material/Chip';
 
-import { styled } from '@mui/system';
+import { styled, lighten, darken } from '@mui/system';
 
 import Item from './Item';
 
 import SHIPS from '../data/ships.json';
+import  {
+  NestedItemList,
+} from './App.styles.js';
 import './App.css';
 
 const GroupHeader = styled('div')(({ theme }) => ({
   position: 'sticky',
   top: '-8px',
   padding: '0.4em 1em',
-  color: '#000000de',
-  backgroundColor: '#ebebeb',
+  color: theme.palette.primary.main,
+  backgroundColor:
+    theme.palette.mode === 'light'
+      ? lighten(theme.palette.primary.light, 0.85)
+      : darken(theme.palette.primary.main, 0.8),
 }));
 
 const GroupItems = styled('ul')({
@@ -72,6 +83,8 @@ function ShipIconChip({ ship, ...params }) {
 }
 
 function App() {
+  const theme = useTheme();
+  const colorMode = useColorModeContext();
   const { enqueueSnackbar } = useSnackbar();
   const { zkillPointsState, zkillPointsDispatch } = useZkillPointsContext();
   const state = useMemo(() => {
@@ -139,11 +152,27 @@ function App() {
   
   return (
     <Box sx={{ width: '100%', margin: '0 auto', textAlign: 'center', padding: '0 10px', }}>
+      <p style={{ textAlign: 'right' }}>
+        <IconButton
+          sx={{ ml: 1 }}
+          onClick={async (e) => {
+            e.preventDefault();
+            await navigator.clipboard.writeText(url);
+            enqueueSnackbar('Simulation URL copied to clipboard!', { variant: 'success' });
+          }}
+          color="inherit"
+        >
+          {<IosShareIcon />}
+        </IconButton>
+        <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
+          {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+        </IconButton>
+      </p>
       <div className="App-header">
         <a className="App-headlineLink" href="/">
-          <h1 className="App-headline">Killmail Simulator</h1>
+          <Typography variant="h4" className="App-headline">Killmail Simulator</Typography>
         </a>
-        <p className="App-tagline">"What's the <em>point</em> of this anyway?"</p>
+        <Typography  variant="subtitle" className="App-tagline">"What's the <em>point</em> of this anyway?"</Typography>
       </div>
       <div className="Controls">
         <FormControl sx={{ m: 1, minWidth: 320 }}>
@@ -196,33 +225,25 @@ function App() {
             }}
           />
         </FormControl>
-        <p className="App-instructions">
-          This is a tool for simulating the point value of <a href="https://zkillboard.com/" target="_blank" rel="noreferrer">zkillboard</a> killmails.
-          Add a ship fit (in <a href="https://www.eveonline.com/news/view/import-export-fittings" target="_blank" rel="noreferrer">EFT format</a>) and select some attacker ships to get started.
-        </p>
+        <div className="App-instructions">
+          <Typography variant="body2">
+            This is a tool for simulating the point value of <a href="https://zkillboard.com/" target="_blank" rel="noreferrer">zkillboard</a> killmails.
+            Add a ship fit (in <a href="https://www.eveonline.com/news/view/import-export-fittings" target="_blank" rel="noreferrer">EFT format</a>) and select some attacker ships to get started.
+          </Typography>
+        </div>
       </div>
       {state.shipInfo ? (
         <>
-          <Divider sx={{ margin: '3em 0 0' }} />
-          <p style={{ textAlign: 'right' }}>
-            <Button
-              onClick={async (e) => {
-                e.preventDefault();
-                await navigator.clipboard.writeText(url);
-                enqueueSnackbar('URL copied to clipboard!', { variant: 'success' });
-              }}
-            >
-              Copy Link
-            </Button>
-          </p>
+          <Divider sx={{ margin: '3em 0' }} />
           <Typography variant="h3" gutterBottom sx={{ textAlign: 'center' }}>
             {state.totalPoints} Points
           </Typography>
           <div className="PointBreakdown">
             <div className="PointBreakdown-victim">
-              <h2 className="PointBreakdown-headline">
+              <Typography variant="h6" className="PointBreakdown-headline">
                 Point Breakdown ({state.basePoints + state.dangerFactor})
-              </h2>
+              </Typography>
+              <Divider sx={{ margin: '0.45em 0 0' }} />
               <ul className="ItemList">
                 <li className="ItemList-item">
                   <Item
@@ -241,7 +262,7 @@ function App() {
                   />
                 </li>
                 <li>
-                  <ul className="ItemList">
+                  <NestedItemList className="ItemList">
                     {state.shipInfo.modules.sort((a, b) => Math.abs(b.dangerFactor) - Math.abs(a.dangerFactor)).map((module, i) => (
                       <li
                         className="ItemList-item"
@@ -266,14 +287,15 @@ function App() {
                         demphasized={true}
                       />
                     </li>
-                  </ul>
+                  </NestedItemList>
                 </li>
               </ul>
             </div>
             <div className="PointBreakdown-attacker">
-              <h2 className="PointBreakdown-headline">
+              <Typography variant="h6" className="PointBreakdown-headline">
                 Modifiers
-              </h2>
+              </Typography>
+              <Divider sx={{ margin: '0.45em 0 0' }} />
               <ul className="ItemList">
                 <li className="ItemList-item">
                   <Item
@@ -298,7 +320,7 @@ function App() {
                     itemTooltip="A bonus/penalty from -50% to 20% depending on average size of attacking ships. For example: Smaller ships blowing up bigger ships get a bonus or bigger ships blowing up smaller ships get a penalty. Penalty is applied after blob penalty."
                     itemText={`${state.shipSizeMultiplier > 0 ? `+${state.shipSizeMultiplier}%` : state.shipSizeMultiplier < 0 ? `${state.shipSizeMultiplier}%` : '--'}`}
                   />
-                  <ul className="ItemList">
+                  <NestedItemList className="ItemList">
                     {zkillPointsState.attackers.map((ship) => (
                       <li
                         className="ItemList-item"
@@ -312,7 +334,7 @@ function App() {
                         />
                       </li>
                     ))}
-                  </ul>
+                  </NestedItemList>
                   {/* {zkillPointsState.attackers.length ? (
                     <ul className="ItemList">
                       <li className="ItemList-item">

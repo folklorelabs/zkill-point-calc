@@ -12,10 +12,10 @@ export const InnerWrapper = styled.div`
 
 export const ImageItem = styled.img`
     display: block;
-    width: 3.15em;
-    height: 3.15em;
+    width: 4em;
+    height: 4em;
     margin-right: 0.667em;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid ${({ theme }) => theme.palette.divider};
 `;
 
 export const TextWrapper = styled.div`
@@ -25,16 +25,4 @@ export const TextWrapper = styled.div`
     flex-direction: column;
     align-items: flex-start;
     font-weight: bold;
-`;
-
-export const TextPrimary = styled.span`
-    font-size: 1.333em;
-    line-height: 1.15em;
-    margin-bottom: 0.1em;
-`;
-
-export const TextSecondary = styled.span`
-    text-transform: uppercase;
-    font-size: 0.9em;
-    opacity: 0.8;
 `;

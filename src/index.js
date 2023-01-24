@@ -5,18 +5,31 @@ import './index.styles.js';
 import CssBaseline from '@mui/material/CssBaseline';
 import App from './components/App';
 import { ZkillPointsProvider } from './contexts/ZkillPoints';
+import { ColorModeProvider } from './contexts/ColorMode';
 import { SnackbarProvider } from 'notistack';
 import reportWebVitals from './reportWebVitals';
+
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+});
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <SnackbarProvider maxSnack={3}>
-      <ZkillPointsProvider>
-        <CssBaseline />
-        <App />
-      </ZkillPointsProvider>
-    </SnackbarProvider>
+    <ThemeProvider theme={darkTheme}>
+      <ColorModeProvider>
+        <SnackbarProvider maxSnack={3}>
+          <ZkillPointsProvider>
+            <CssBaseline />
+            <App />
+          </ZkillPointsProvider>
+        </SnackbarProvider>
+      </ColorModeProvider>
+    </ThemeProvider>
   </React.StrictMode>
 );
 
