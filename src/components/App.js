@@ -199,7 +199,7 @@ function App() {
                   <Item
                     itemImageSrc={`https://images.evetech.net/types/23740/icon?size=64`}
                     itemName="Danger Factor"
-                    itemTooltip={`The sum of all fitted "dangerous" modules flagged as a High Slot, Mid Slot, Low Slot, or SubSystem at time of death. Modules are considered "dangerous" if they are a Drone Damage mod or if they can be overheated. Likewise, Mining Lasers actually reduce this value.`}
+                    itemTooltip={`The sum of all fitted "dangerous" modules flagged as a High Slot, Mid Slot, Low Slot, or SubSystem at time of death. Modules are considered "dangerous" if they are a Drone Damage mod or if they can be overheated. Likewise, Mining Lasers actually reduce this value. Abyssal mods are also not factored into calculations more than likely because of complexity.`}
                     itemText={`${state.dangerFactor} points`}
                   />
                 </li>
@@ -214,9 +214,9 @@ function App() {
                           key={module.uuid}
                           itemImageSrc={`https://images.evetech.net/types/${module.id}/icon?size=64`}
                           itemName={module.name}
-                          itemTooltip={`This module ${module.dangerFactor === 0 ? 'is not factored into point tally.' : ''} ${module.hasHeat ? 'is factored into point tally because it has heat damage.' : ''}${module.isDroneMod ? 'is factored into point tally because it is a drone damage mod.' : ''}${module.isMiningMod ? 'is factored into point tally because it is a mining harvester.' : ''}${module.hasHeat || module.isDroneMod || module.isMiningMod ? ` Point value is based on the module's meta level (${module.metaLevel}). Calculation is 1 + floor(metaLevel / 2)).` : ''}`}
+                          itemTooltip={`This module ${!module.dangerFactor ? 'is not factored into point tally.' : ''} ${module.hasHeat ? 'is factored into point tally because it has heat damage.' : ''}${module.isDroneMod ? 'is factored into point tally because it is a drone damage mod.' : ''}${module.isMiningMod ? 'is factored into point tally because it is a mining harvester.' : ''}${module.hasHeat || module.isDroneMod || module.isMiningMod ? ` Point value is based on the module's meta level (${module.metaLevel}). Calculation is 1 + floor(metaLevel / 2)).` : ''}`}
                           itemText={`${module.dangerFactor} points`}
-                          demphasized={module.dangerFactor === 0}
+                          demphasized={!module.dangerFactor}
                         />
                       </li>
                     ))}
