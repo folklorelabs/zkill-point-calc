@@ -12,13 +12,18 @@ import {
   getTotalPoints,
 } from '../contexts/ZkillPoints';
 
+import { debounce } from 'throttle-debounce';
+import { useSnackbar } from 'notistack';
+
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 import Chip from '@mui/material/Chip';
+
 import { styled } from '@mui/system';
 
 import Item from './Item';
@@ -67,6 +72,7 @@ function ShipIconChip({ ship, ...params }) {
 }
 
 function App() {
+  const { enqueueSnackbar } = useSnackbar();
   const { zkillPointsState, zkillPointsDispatch } = useZkillPointsContext();
   const state = useMemo(() => {
     const dangerFactor = getDangerFactor(zkillPointsState);
@@ -147,9 +153,14 @@ function App() {
             multiline
             maxRows={15}
             variant="standard"
-            onChange={(e) => {
-              zkillPointsDispatch(loadVictim(e.target.value));
-            }}
+            onChange={debounce(300, (e) => {
+              if (!e.target.value) return;
+              try {
+                zkillPointsDispatch(loadVictim(e.target.value));
+              } catch(err) {
+                enqueueSnackbar('Error parsing EFT. Please try again.', { variant: 'error' });
+              }
+            })}
           />
         </FormControl>
         <FormControl sx={{ m: 1, minWidth: 320 }}>
@@ -192,19 +203,21 @@ function App() {
       </div>
       {state.shipInfo ? (
         <>
-          <Divider sx={{ margin: '3em 0' }} />
+          <Divider sx={{ margin: '3em 0 0' }} />
+          <p style={{ textAlign: 'right' }}>
+            <Button
+              onClick={async (e) => {
+                e.preventDefault();
+                await navigator.clipboard.writeText(url);
+                enqueueSnackbar('URL copied to clipboard!', { variant: 'success' });
+              }}
+            >
+              Copy Link
+            </Button>
+          </p>
           <Typography variant="h3" gutterBottom sx={{ textAlign: 'center' }}>
             {state.totalPoints} Points
           </Typography>
-          <p style={{ textAlign: 'center' }}>
-            <a
-              href={url}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {url.length < 60 ? url : `${url.slice(0, 40)}...${url.slice(url.length - 20, url.length)}`}
-            </a>
-          </p>
           <div className="PointBreakdown">
             <div className="PointBreakdown-victim">
               <h2 className="PointBreakdown-headline">

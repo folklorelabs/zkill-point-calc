@@ -79,36 +79,32 @@ export function parseUrl() {
       const [moduleId, qtyStr] = m.split('_');
       const qty = parseInt(qtyStr || 1, 10);
       const module = MODULES.find((md) => md.id === moduleId);
+      if (!module) return all;
       return [
         ...all,
         ...Array.from(Array(qty || 1)).map(() => ({
           ...module,
+          uuid: uuid(),
         })),
       ];
-    }, [])
-    .filter((module) => !!module)
-    .map((module) => ({
-      ...module,
-      uuid: uuid(),
-    }));
+    }, []);
   const shipInfo = victimModules.length && {
     ...ship,
     modules: victimModules,
   };
-  const attackersQuery = attackersStr;
-  const attackers = attackersQuery.split('.')
+  const attackers = attackersStr.split('.')
     .reduce((all, s) => {
       const [shipId, qtyStr] = s.split('_');
       const qty = parseInt(qtyStr || 1, 10);
       const ship = SHIPS.find((sd) => sd.id === shipId);
+      if (!ship) return all;
       return [
         ...all,
         ...Array.from(Array(qty || 1)).map(() => ({
           ...ship,
         })),
       ];
-    }, [])
-    .filter((ship) => !!ship);
+    }, []);
   return {
     shipInfo,
     attackers,

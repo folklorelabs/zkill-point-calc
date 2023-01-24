@@ -5,15 +5,18 @@ import './index.styles.js';
 import CssBaseline from '@mui/material/CssBaseline';
 import App from './components/App';
 import { ZkillPointsProvider } from './contexts/ZkillPoints';
+import { SnackbarProvider } from 'notistack';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <ZkillPointsProvider>
-      <CssBaseline />
-      <App />
-    </ZkillPointsProvider>
+    <SnackbarProvider maxSnack={3}>
+      <ZkillPointsProvider>
+        <CssBaseline />
+        <App />
+      </ZkillPointsProvider>
+    </SnackbarProvider>
   </React.StrictMode>
 );
 
