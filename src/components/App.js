@@ -26,6 +26,14 @@ import Item from './Item';
 import SHIPS from '../data/ships.json';
 import './App.css';
 
+function digitToSuperscript(digit) {
+  return '⁰¹²³⁴⁵⁶⁷⁸⁹'[digit];
+}
+
+function intToSuperscript(number) {
+  return Array.from(`${number}`).map((digitStr) => digitToSuperscript(parseInt(digitStr, 10))).join('');
+}
+
 const GroupHeader = styled('div')(({ theme }) => ({
   position: 'sticky',
   top: '-8px',
@@ -75,7 +83,7 @@ function App() {
       basePoints: getBasePoints(zkillPointsState),
       dangerFactor,
       blobPenalty: Math.round(1 / getBlobPenalty(zkillPointsState) * 100) - 100,
-      sealClubbingPenalty: Math.max(0.01, Math.min(1, dangerFactor / 4)) * 100 - 100,
+      snugglyPenalty: Math.max(0.01, Math.min(1, dangerFactor / 4)) * 100 - 100,
       shipSizeMultiplier: Math.round(getShipSizeMultiplier(zkillPointsState) * 100) - 100,
       totalPoints: getTotalPoints(zkillPointsState),
     };
@@ -184,14 +192,14 @@ function App() {
           <div className="PointBreakdown">
             <div className="PointBreakdown-victim">
               <h2 className="PointBreakdown-headline">
-                Point Breakdown
+                Point Breakdown ({state.basePoints + state.dangerFactor})
               </h2>
               <ul className="ItemList">
                 <li className="ItemList-item">
                   <Item
                     itemImageSrc={`https://images.evetech.net/types/${state.shipInfo.id}/icon?size=64`}
                     itemName={state.shipInfo.name}
-                    itemTooltip={`Point value is based on the ship's rig slot size (${state.shipInfo.rigSize}). Calculation is (5 ^ rigSlotSize).`}
+                    itemTooltip={`Ship points are determined by their in-game "Rig Size" attribute. The formula is 5 ⁽ʳⁱᵍ ˢⁱᶻᵉ⁾.`}
                     itemText={`${state.basePoints} points`}
                   />
                 </li>
@@ -199,13 +207,13 @@ function App() {
                   <Item
                     itemImageSrc={`https://images.evetech.net/types/23740/icon?size=64`}
                     itemName="Danger Factor"
-                    itemTooltip={`The sum of all fitted "dangerous" modules flagged as a High Slot, Mid Slot, Low Slot, or SubSystem at time of death. Modules are considered "dangerous" if they are a Drone Damage mod or if they can be overheated. Likewise, Mining Lasers actually reduce this value. Abyssal mods are also not factored into calculations more than likely because of complexity.`}
+                    itemTooltip={`Danger Factor is the sum of all "dangerous" and "snuggly" modules fitted to the ship and flagged as a "High Slot", "Mid Slot", "Low Slot", or "SubSystem" in the killmail. A module is considered "dangerous" if it can be overehated or if it belongs to the "Drone Damage Module" group. A module is considered "snuggly" if it belonging to the "Mining Laser" group. Abyssal mods are not factored into this calculation more than likely because of complexity.`}
                     itemText={`${state.dangerFactor || 0} points`}
                   />
                 </li>
                 <li>
                   <ul className="ItemList">
-                    {state.shipInfo.modules.sort((a, b) => b.dangerFactor - a.dangerFactor).map((module, i) => (
+                    {state.shipInfo.modules.sort((a, b) => Math.abs(b.dangerFactor) - Math.abs(a.dangerFactor)).map((module, i) => (
                       <li
                         className="ItemList-item"
                         key={module.uuid}
@@ -214,8 +222,8 @@ function App() {
                           key={module.uuid}
                           itemImageSrc={`https://images.evetech.net/types/${module.id}/icon?size=64`}
                           itemName={module.name}
-                          itemTooltip={`This module ${!module.dangerFactor ? 'is not factored into point tally.' : ''} ${module.hasHeat ? 'is factored into point tally because it has heat damage.' : ''}${module.isDroneMod ? 'is factored into point tally because it is a drone damage mod.' : ''}${module.isMiningMod ? 'is factored into point tally because it is a mining harvester.' : ''}${module.hasHeat || module.isDroneMod || module.isMiningMod ? ` Point value is based on the module's meta level (${module.metaLevel}). Calculation is 1 + floor(metaLevel / 2)).` : ''}`}
-                          itemText={`${module.dangerFactor} points`}
+                          itemTooltip={!module.dangerFactor ? 'This module is not considered "dangerous" or "snuggly".' : `This module is considered ${module.isMiningMod ? '"snuggly"' : '"dangerous"'} because it ${module.isMiningMod ? 'is a Mining Laser' : module.isDroneMod ? 'is a Dron Damage Module' : 'can be overheated'}. Module points are determined by their in-game "Meta Level" attribute. The formula is 1 + floor(metaLevel / 2).`}
+                          itemText={`${module.dangerFactor ? `${module.dangerFactor} points` : '--'}`}
                           demphasized={!module.dangerFactor}
                         />
                       </li>
@@ -225,7 +233,7 @@ function App() {
                         itemImageSrc="https://images.evetech.net/types/1317/icon?size=64"
                         itemName="Cargo Items"
                         itemTooltip="Cargo items are ignored in tally."
-                        itemText="0 points"
+                        itemText="--"
                         demphasized={true}
                       />
                     </li>
@@ -241,16 +249,16 @@ function App() {
                 <li className="ItemList-item">
                   <Item
                     itemImageSrc={`https://images.evetech.net/types/28837/icon?size=64`}
-                    itemName="Seal Clubbing Penalty"
+                    itemName="Defenseless Penalty"
                     itemTooltip="A penalty from -0% to -99% increasing inversely proportional to the victim's danger rating. Non-pvp ship, empty ships, etc are worth much less. Penalty is only applied to ships with a danger factor less than 4."
-                    itemText={`${state.sealClubbingPenalty ? `${state.sealClubbingPenalty}%` : '--'}`}
+                    itemText={`${state.snugglyPenalty ? `${state.snugglyPenalty}%` : '--'}`}
                   />
                 </li>
                 <li className="ItemList-item">
                   <Item
                     itemImageSrc={`https://images.evetech.net/alliances/1354830081/logo?size=64`}
                     itemName="Blob Penalty"
-                    itemTooltip="A penalty from -0% to -99.9999...% based on the number of attackers. Starts at -0% for solo, -50% for two, -78% for three, -87% for four, etc. Penalty is applied after Seal Clubbing Penalty."
+                    itemTooltip="A penalty from -0% to -99.9999...% based on the number of attackers. Starts at -0% for solo, -50% for two, -78% for three, -87% for four, etc. Penalty is applied after Defenseless Penalty."
                     itemText={`${state.blobPenalty ? `${state.blobPenalty}%` : '--'}`}
                   />
                 </li>
@@ -270,7 +278,7 @@ function App() {
                         <Item
                           itemImageSrc={`https://images.evetech.net/types/${ship.id === 'Rat' ? '30193' : ship.id}/icon?size=64`}
                           itemName={ship.name}
-                          itemTooltip={ship.name === 'Capsule' ? `Capsules are a special case. Point value is based on the victim ship's rig slot size + 1 (${state.shipInfo.rigSize + 1}). Calculation is (5 ^ (victimRigSlotSize + 1)).` : `Point value is based on the ship's rig slot size (${ship.rigSize}). Calculation is (5 ^ rigSlotSize).`}
+                          itemTooltip={`Ship points are determined by their in-game "Rig Size" attribute. The formula is 5 ⁽ʳⁱᵍ ˢⁱᶻᵉ⁾. ${ship.name === 'Capsule' ? ` Capsules are a special case. A capsules "Rig Size" is equal to that of the victim ship + 1.` : ''}`}
                           itemText={`${ship.name === 'Capsule' ? Math.pow(5, state.shipInfo.rigSize + 1) : Math.pow(5, ship.rigSize)} points`}
                         />
                       </li>

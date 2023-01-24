@@ -19,7 +19,7 @@ async function getShips() {
             id: ship.typeID,
             name: ship.typeName,
             group: ship.groupName,
-            rigSize: rigSize ? rigSize.value : 1,
+            rigSize: rigSize ? rigSize.value : 0,
         };
     });
 
