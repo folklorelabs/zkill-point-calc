@@ -25,13 +25,13 @@ async function getShips() {
 
     // add static ships
     formattedShips.push({
-        id: 'Rat',
+        id: '30193',
         name: 'Rat',
         group: 'Rat',
         rigSize: 1,
     });
     formattedShips.push({
-        id: 'Structure',
+        id: '35833',
         name: 'Structure',
         group: 'Structure',
         rigSize: 1,

@@ -44,7 +44,7 @@ function ShipIconOption({ ship, className, ...params }) {
       <img
         loading="lazy"
         className="ShipIconOption-image"
-        src={`https://images.evetech.net/types/${ship.id === 'Rat' ? '30193' : ship.id === 'Structure' ? '35833' : ship.id}/icon?size=32`}
+        src={`https://images.evetech.net/types/${ship.id}/icon?size=32`}
         alt=""
       />
       <span>{ship.name}</span>
@@ -57,7 +57,7 @@ function ShipIconChip({ ship, ...params }) {
     <Chip
       avatar={(<img
         className="ShipIconChip-image"
-        src={`https://images.evetech.net/types/${ship.id === 'Rat' ? '30193' : ship.id}/icon?size=32`}
+        src={`https://images.evetech.net/types/${ship.id}/icon?size=32`}
         alt=""
       />)}
       label={ship.name}
@@ -269,7 +269,7 @@ function App() {
                         key={ship.uuid}
                       >
                         <Item
-                          itemImageSrc={`https://images.evetech.net/types/${ship.id === 'Rat' ? '30193' : ship.id}/icon?size=64`}
+                          itemImageSrc={`https://images.evetech.net/types/${ship.id}/icon?size=64`}
                           itemName={ship.name}
                           itemTooltip={`Ship points are determined by their in-game "Rig Size" attribute. The formula is 5 ⁽ʳⁱᵍ ˢⁱᶻᵉ⁾. ${ship.name === 'Capsule' ? ` Capsules are a special case. A capsules "Rig Size" is equal to that of the victim ship + 1.` : ''}`}
                           itemText={`${ship.name === 'Capsule' ? Math.pow(5, state.shipInfo.rigSize + 1) : Math.pow(5, ship.rigSize)} points`}
