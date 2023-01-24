@@ -113,7 +113,9 @@ function App() {
   return (
     <Box sx={{ width: '100%', margin: '0 auto', textAlign: 'center', padding: '0 10px', }}>
       <div className="App-header">
-        <h1 className="App-headline">Killmail Simulator</h1>
+        <a className="App-headlineLink" href="/">
+          <h1 className="App-headline">Killmail Simulator</h1>
+        </a>
         <p className="App-tagline">"What's the <em>point</em> of this anyway?"</p>
       </div>
       <div className="Controls">

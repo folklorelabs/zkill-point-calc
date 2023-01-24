@@ -6,6 +6,11 @@
   margin: 20px 0;
 }
 
+.App-headlineLink {
+  color: inherit;
+  text-decoration: none;
+}
+
 .App-headline {
   margin: 0;
   padding: 0;
