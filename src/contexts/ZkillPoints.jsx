@@ -22,7 +22,7 @@ export function parseEft(eft) {
   if (!ship) throw new Error(`Invalid EFT. Unknown ship ${shipName}.`);
   const eftLines = eft.split('\n');
   const eftLinesClean = eftLines
-    .slice(1, eftLines.length - 1)
+    .slice(1, eftLines.length)
     .filter((line) => !!line)
     .map(line => line.split(',')[0]);
   const modules = eftLinesClean

@@ -26,14 +26,6 @@ import Item from './Item';
 import SHIPS from '../data/ships.json';
 import './App.css';
 
-function digitToSuperscript(digit) {
-  return '⁰¹²³⁴⁵⁶⁷⁸⁹'[digit];
-}
-
-function intToSuperscript(number) {
-  return Array.from(`${number}`).map((digitStr) => digitToSuperscript(parseInt(digitStr, 10))).join('');
-}
-
 const GroupHeader = styled('div')(({ theme }) => ({
   position: 'sticky',
   top: '-8px',
