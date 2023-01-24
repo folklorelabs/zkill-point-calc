@@ -40,6 +40,81 @@ export function parseEft(eft) {
   };
 }
 
+export function parseUrlLegacy() {
+  const url = new URL(window.location);
+  const params = url.searchParams;
+  const ship = SHIPS.find((s) => s.name === params.get('shipInfo'));
+  const victimModulesQuery = params.get('victimModules') || '';
+  const victimModules = victimModulesQuery.split(',')
+    .map((moduleName) => MODULES.find((m) => m.name === moduleName))
+    .filter((module) => !!module)
+    .map((module) => ({
+      ...module,
+      uuid: uuid(),
+    }));
+  const shipInfo = victimModules.length && {
+    ...ship,
+    modules: victimModules,
+  };
+  const attackersQuery = params.get('attackers') || '';
+  const attackers = attackersQuery.split(',')
+    .map((shipName) => SHIPS.find((s) => s.name === shipName))
+    .filter((ship) => !!ship);
+  return {
+    shipInfo,
+    attackers,
+  }
+}
+
+export function parseUrl() {
+  const url = new URL(window.location);
+  const params = url.searchParams;
+  const [shipStr, modulesStr='', attackersStr=''] = (params.get('k') || '').split('-');
+  if (!shipStr) return {};
+  const ship = SHIPS.find((s) => s.id === shipStr);
+  if (!ship) return {};
+  const victimModulesQuery = modulesStr || '';
+  const victimModules = victimModulesQuery.split('.')
+    .reduce((all, m) => {
+      const [moduleId, qtyStr] = m.split('_');
+      const qty = parseInt(qtyStr || 1, 10);
+      const module = MODULES.find((md) => md.id === moduleId);
+      return [
+        ...all,
+        ...Array.from(Array(qty || 1)).map(() => ({
+          ...module,
+        })),
+      ];
+    }, [])
+    .filter((module) => !!module)
+    .map((module) => ({
+      ...module,
+      uuid: uuid(),
+    }));
+  const shipInfo = victimModules.length && {
+    ...ship,
+    modules: victimModules,
+  };
+  const attackersQuery = attackersStr;
+  const attackers = attackersQuery.split('.')
+    .reduce((all, s) => {
+      const [shipId, qtyStr] = s.split('_');
+      const qty = parseInt(qtyStr || 1, 10);
+      const ship = SHIPS.find((sd) => sd.id === shipId);
+      return [
+        ...all,
+        ...Array.from(Array(qty || 1)).map(() => ({
+          ...ship,
+        })),
+      ];
+    }, [])
+    .filter((ship) => !!ship);
+  return {
+    shipInfo,
+    attackers,
+  }
+}
+
 // STATE
 const INITIAL_STATE = {
   shipInfo: null,
@@ -208,28 +283,14 @@ export function ZkillPointsProvider({
   }), [zkillPointsState, zkillPointsDispatch]);
 
   useEffect(() => {
-    const url = new URL(window.location);
-    const params = url.searchParams;
-    const shipInfo = SHIPS.find((s) => s.name === params.get('shipInfo'));
-    const victimModulesQuery = params.get('victimModules') || '';
-    const victimModules = victimModulesQuery.split(',')
-      .map((moduleName) => MODULES.find((m) => m.name === moduleName))
-      .filter((module) => !!module)
-      .map((module) => ({
-        ...module,
-        uuid: uuid(),
-      }));
-    if (victimModules.length) {
-      zkillPointsDispatch(loadVictim({
-        ...shipInfo,
-        modules: victimModules,
-      }));
+    const legacyData = parseUrlLegacy();
+    const data = parseUrl();
+    const shipInfo = data.shipInfo || legacyData.shipInfo;
+    const attackers = data.attackers || legacyData.attackers;
+    if (shipInfo && shipInfo.id && shipInfo.name && shipInfo.modules.length) {
+      zkillPointsDispatch(loadVictim(shipInfo));
     }
-    const attackersQuery = params.get('attackers') || '';
-    const attackers = attackersQuery.split(',')
-      .map((shipName) => SHIPS.find((s) => s.name === shipName))
-      .filter((ship) => !!ship);
-    if (attackers.length) {
+    if (attackers && attackers.length) {
       zkillPointsDispatch(loadAttackers(attackers));
     }
   }, []);
