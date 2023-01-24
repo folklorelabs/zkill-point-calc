@@ -30,6 +30,12 @@ async function getShips() {
         group: 'Rat',
         rigSize: 1,
     });
+    formattedShips.push({
+        id: 'Structure',
+        name: 'Structure',
+        group: 'Structure',
+        rigSize: 1,
+    });
 
     return formattedShips;
 }

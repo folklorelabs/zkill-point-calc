@@ -44,7 +44,7 @@ function ShipIconOption({ ship, className, ...params }) {
       <img
         loading="lazy"
         className="ShipIconOption-image"
-        src={`https://images.evetech.net/types/${ship.id === 'Rat' ? '30193' : ship.id}/icon?size=32`}
+        src={`https://images.evetech.net/types/${ship.id === 'Rat' ? '30193' : ship.id === 'Structure' ? '35833' : ship.id}/icon?size=32`}
         alt=""
       />
       <span>{ship.name}</span>
