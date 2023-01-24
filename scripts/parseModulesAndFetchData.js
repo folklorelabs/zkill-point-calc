@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
+const ensureRecursiveSync = require('./utils/ensureRecursiveSync');
+
 const DOGMA_ATTR_META_LVL = 633
 const DOGMA_ATTR_HEAT_DMG = 1211;
 
@@ -21,6 +23,7 @@ async function getType(typeId) {
     }
     const res = await fetch(`https://esi.evetech.net/latest/universe/types/${typeId}`);
     const data = await res.json();
+    ensureRecursiveSync(path.dirname(cachePath));
     await fs.writeFileSync(cachePath, JSON.stringify(data));
     return data;
 }

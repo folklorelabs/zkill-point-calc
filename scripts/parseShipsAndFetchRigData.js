@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
+const ensureRecursiveSync = require('./utils/ensureRecursiveSync');
+
 const DOGMA_ATTR_RIG = 1547;
 
 async function getInvData(invType) {
@@ -19,6 +21,7 @@ async function getType(typeId) {
     }
     const res = await fetch(`https://esi.evetech.net/latest/universe/types/${typeId}`);
     const data = await res.json();
+    ensureRecursiveSync(path.dirname(cachePath));
     await fs.writeFileSync(cachePath, JSON.stringify(data));
     return data;
 }
