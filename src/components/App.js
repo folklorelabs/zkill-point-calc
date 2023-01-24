@@ -200,7 +200,7 @@ function App() {
                     itemImageSrc={`https://images.evetech.net/types/23740/icon?size=64`}
                     itemName="Danger Factor"
                     itemTooltip={`The sum of all fitted "dangerous" modules flagged as a High Slot, Mid Slot, Low Slot, or SubSystem at time of death. Modules are considered "dangerous" if they are a Drone Damage mod or if they can be overheated. Likewise, Mining Lasers actually reduce this value. Abyssal mods are also not factored into calculations more than likely because of complexity.`}
-                    itemText={`${state.dangerFactor} points`}
+                    itemText={`${state.dangerFactor || 0} points`}
                   />
                 </li>
                 <li>
