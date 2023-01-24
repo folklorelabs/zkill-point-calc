@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 
 export const Container = styled.div`
-    opacity: ${({ demphasized }) => demphasized ? 0.6 : 1};
     font-size: ${({ size }) => size}em;
     cursor: help;
 `;

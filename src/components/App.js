@@ -1,5 +1,5 @@
 import {
-  useMemo,
+  useMemo, useState,
 } from 'react';
 import {
   useZkillPointsContext,
@@ -15,35 +15,38 @@ import {
 import { debounce } from 'throttle-debounce';
 import { useSnackbar } from 'notistack';
 
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import FormControl from '@mui/material/FormControl';
-import Link from '@mui/material/Link';
-import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
-import Divider from '@mui/material/Divider';
-import Chip from '@mui/material/Chip';
+import {
+  Box,
+  Typography,
+  FormControl,
+  Link,
+  Autocomplete,
+  TextField,
+  Divider,
+  Chip,
+  Popover,
+} from '@mui/material';
 
 import { styled, lighten, darken } from '@mui/system';
 
 import Item from './Item';
 import AppToolbar from './AppToolbar';
+import { TypeEmphasis } from './TypeEmphasis';
 
 import SHIPS from '../data/ships.json';
 import  {
   NestedItemList,
 } from './App.styles.js';
 import './App.css';
+import useSimUrl from '../hooks/useSimUrl';
+import { useTheme } from '@emotion/react';
 
 const GroupHeader = styled('div')(({ theme }) => ({
   position: 'sticky',
   top: '-8px',
   padding: '0.4em 1em',
-  color: theme.palette.primary.main,
-  backgroundColor:
-    theme.palette.mode === 'light'
-      ? lighten(theme.palette.primary.light, 0.85)
-      : darken(theme.palette.primary.main, 0.8),
+  color: 'rgba(theme.palette.text.secondary, 0.8)',
+  backgroundColor: theme.palette.background.default,
 }));
 
 const GroupItems = styled('ul')({
@@ -51,8 +54,9 @@ const GroupItems = styled('ul')({
 });
 
 function ShipIconOption({ ship, className, ...params }) {
+  const theme = useTheme();
   return (
-    <li className={`ShipIconOption ${className}`} {...params}>
+    <li className={`ShipIconOption ${className}`} style={{ backgroundColor: theme.palette.background.default, color: theme.palette.text.secondary }} {...params}>
       <img
         loading="lazy"
         className="ShipIconOption-image"
@@ -65,8 +69,10 @@ function ShipIconOption({ ship, className, ...params }) {
 }
 
 function ShipIconChip({ ship, ...params }) {
+  const theme = useTheme();
   return (
     <Chip
+      sx={{ color: theme.palette.text.secondary }}
       avatar={(<img
         className="ShipIconChip-image"
         src={`https://images.evetech.net/types/${ship.id}/icon?size=32`}
@@ -104,84 +110,115 @@ function App() {
   //     return total + (ship.name === 'Capsule' ? Math.pow(5, zkillPointsState.shipInfo.rigSize + 1) : Math.pow(5, ship.rigSize));
   //   }, 0) / attackerShips.length);
   // }, [zkillPointsState]);
+  const url = useSimUrl();
+  const [popAnchor, setPopAnchor] = useState(null);
   
   return (
-    <Box sx={{ width: '100%', margin: '0 auto', textAlign: 'center', }}>
+    <Box sx={{ width: '100%', maxWidth: 1050, margin: '0 auto', textAlign: 'center', }}>
       <AppToolbar />
-      <div className="App-header">
-        <a className="App-headlineLink" href="/">
-          <Typography variant="h4" className="App-headline">Killmail Simulator</Typography>
-        </a>
-        <Typography  variant="subtitle" className="App-tagline">"What's the <em>point</em> of this anyway?"</Typography>
-      </div>
-      <div className="Controls">
-        <FormControl sx={{ m: 1, minWidth: 320 }}>
-          <TextField
-            id="eft-input"
-            label="Victim Fit (EFT Format)"
-            multiline
-            maxRows={15}
-            variant="standard"
-            onChange={debounce(300, (e) => {
-              if (!e.target.value) return;
-              try {
-                zkillPointsDispatch(loadVictim(e.target.value));
-              } catch(err) {
-                enqueueSnackbar('Error parsing EFT. Please try again.', { variant: 'error' });
-              }
-            })}
-          />
-        </FormControl>
-        <FormControl sx={{ m: 1, minWidth: 320 }}>
-          <Autocomplete
-            id="attacker-select"
-            multiple
-            disableCloseOnSelect
-            limitTags={1}
-            options={availableAttackers}
-            value={zkillPointsState.attackers}
-            isOptionEqualToValue={(option, value) => false}
-            groupBy={(option) => `${option.group} (${Math.pow(5, option.rigSize)} points)`}
-            getOptionLabel={(option) => option.name}
-            sx={{ width: 320 }}
-            slotProps={{
-              style: {
-                padding: 0,
-                margin: 0,
-              }
-           }}
-            renderInput={(params) => <TextField label="Attacker Ships" variant="standard" {...params} />}
-            renderTags={(tagValue, getTagProps) => (tagValue.map((option, index) => <ShipIconChip key={option.id} ship={option} {...getTagProps({ index })} />))}
-            renderOption={(params, option) => (<ShipIconOption key={option.id} ship={option} {...params} />)}
-            renderGroup={(params) => (
-              <li key={params.group}>
-                <GroupHeader>{params.group}</GroupHeader>
-                <GroupItems>{params.children}</GroupItems>
-              </li>
-            )}
-            clearOnEscape
-            onChange={(event, newValue) => {
-              zkillPointsDispatch(loadAttackers(newValue));
-            }}
-          />
-        </FormControl>
-        <div className="App-instructions">
-          <Typography variant="body2">
-            This is a tool for simulating the point value of <Link href="https://zkillboard.com/" target="_blank" rel="noreferrer">zkillboard</Link> killmails.
-            Add a ship fit (in <Link href="https://www.eveonline.com/news/view/import-export-fittings" target="_blank" rel="noreferrer">EFT format</Link>) and select some attacker ships to get started.
-          </Typography>
+      <Box>
+        <div className="App-header">
+          <a className="App-headlineLink" href="/">
+            <TypeEmphasis>
+              <Typography variant="h4" className="App-headline">Killmail Simulator</Typography>
+            </TypeEmphasis>
+          </a>
+          <Typography  variant="subtitle" className="App-tagline">"What's the <TypeEmphasis>point</TypeEmphasis> of this anyway?"</Typography>
         </div>
-      </div>
+        <div className="Controls">
+          <FormControl sx={{ m: 1, minWidth: 320 }}>
+            <TextField
+              id="eft-input"
+              label="Victim Fit (EFT Format)"
+              multiline
+              maxRows={15}
+              variant="standard"
+              onChange={debounce(300, (e) => {
+                if (!e.target.value) return;
+                try {
+                  zkillPointsDispatch(loadVictim(e.target.value));
+                } catch(err) {
+                  enqueueSnackbar('Error parsing EFT. Please try again.', { variant: 'error' });
+                }
+              })}
+            />
+          </FormControl>
+          <FormControl sx={{ m: 1, minWidth: 320 }}>
+            <Autocomplete
+              id="attacker-select"
+              multiple
+              disableCloseOnSelect
+              clearOnEscape
+              limitTags={1}
+              options={availableAttackers}
+              value={zkillPointsState.attackers}
+              isOptionEqualToValue={(option, value) => false}
+              groupBy={(option) => `${option.group} (${Math.pow(5, option.rigSize)} points)`}
+              getOptionLabel={(option) => option.name}
+              sx={{ width: 320 }}
+              renderInput={(params) => <TextField label="Attacker Ships" variant="standard" {...params} />}
+              renderTags={(tagValue, getTagProps) => (tagValue.map((option, index) => <ShipIconChip key={option.id} ship={option} {...getTagProps({ index })} />))}
+              renderOption={(params, option) => (<ShipIconOption key={option.id} ship={option} {...params} />)}
+              renderGroup={(params) => (
+                <li key={params.group}>
+                  <GroupHeader>{params.group}</GroupHeader>
+                  <GroupItems>{params.children}</GroupItems>
+                </li>
+              )}
+              onChange={(event, newValue) => {
+                zkillPointsDispatch(loadAttackers(newValue));
+              }}
+            />
+          </FormControl>
+          <div className="App-instructions">
+            <Typography variant="body2">
+              This is a tool for simulating the point value of <Link href="https://zkillboard.com/" target="_blank" rel="noreferrer">zkillboard</Link> killmails.
+              Add a ship fit (in <Link href="https://www.eveonline.com/news/view/import-export-fittings" target="_blank" rel="noreferrer">EFT format</Link>) and select some attacker ships to get started.
+            </Typography>
+          </div>
+        </div>
+      </Box>
       {state.shipInfo ? (
         <>
           <Divider sx={{ margin: '3em 0' }} />
-          <Typography variant="h4" gutterBottom sx={{ textAlign: 'center' }}>
-            {state.totalPoints} Points
-          </Typography>
+          <Box sx={{ margin: '0 auto', maxWidth: 760 }}>
+            <Typography variant="h4" gutterBottom sx={{ textAlign: 'center' }}>
+              This <TypeEmphasis>{state.shipInfo.name}</TypeEmphasis> is valued at <TypeEmphasis>{state.totalPoints} points</TypeEmphasis> based on the breakdown below.
+            </Typography>
+            <div>
+              <Link
+                href={url}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigator.clipboard.writeText(url);
+                  setPopAnchor(e.currentTarget);
+                }}
+              >
+                Share this simulation
+              </Link>
+              <Popover
+                open={Boolean(popAnchor)}
+                anchorEl={popAnchor}
+                onClose={() => {
+                setPopAnchor(null);
+                }}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center',
+                }}
+              >
+                <Typography sx={{ p: 2 }}>Link to this simulation copied to clipboard</Typography>
+              </Popover>
+            </div>
+          </Box>
           <div className="PointBreakdown">
             <div className="PointBreakdown-victim">
               <Typography variant="h6" className="PointBreakdown-headline">
-                Point Breakdown ({state.basePoints + state.dangerFactor})
+                Point Summary
               </Typography>
               <Divider sx={{ margin: '0.45em 0 0' }} />
               <ul className="ItemList">
@@ -191,7 +228,7 @@ function App() {
                     itemName={state.shipInfo.name}
                     itemTooltip={`Ship points are determined by their in-game "Rig Size" attribute. The formula is 5 ⁽ʳⁱᵍ ˢⁱᶻᵉ⁾.`}
                     itemText={`${state.basePoints} points`}
-                  />
+                    />
                 </li>
                 <li className="ItemList-item">
                   <Item
@@ -199,14 +236,14 @@ function App() {
                     itemName="Danger Factor"
                     itemTooltip={`Danger Factor is the sum of all "dangerous" and "snuggly" modules fitted to the ship and flagged as a "High Slot", "Mid Slot", "Low Slot", or "SubSystem" in the killmail. A module is considered "dangerous" if it can be overehated or if it belongs to the "Drone Damage Module" group. A module is considered "snuggly" if it belonging to the "Mining Laser" group. Abyssal mods are not factored into this calculation more than likely because of complexity.`}
                     itemText={`${state.dangerFactor || 0} points`}
-                  />
+                    />
                 </li>
                 <li>
                   <NestedItemList className="ItemList">
                     {state.shipInfo.modules.sort((a, b) => Math.abs(b.dangerFactor) - Math.abs(a.dangerFactor)).map((module, i) => (
                       <li
-                        className="ItemList-item"
-                        key={module.uuid}
+                      className="ItemList-item"
+                      key={module.uuid}
                       >
                         <Item
                           key={module.uuid}
@@ -243,6 +280,7 @@ function App() {
                     itemName="Defenseless Penalty"
                     itemTooltip="A penalty from -0% to -99% increasing inversely proportional to the victim's danger rating. Non-pvp ship, empty ships, etc are worth much less. Penalty is only applied to ships with a danger factor less than 4."
                     itemText={`${state.snugglyPenalty ? `${state.snugglyPenalty}%` : '--'}`}
+                    demphasized={!state.snugglyPenalty}
                   />
                 </li>
                 <li className="ItemList-item">
@@ -251,6 +289,7 @@ function App() {
                     itemName="Blob Penalty"
                     itemTooltip="A penalty from -0% to -99.9...% based on the number of attackers. Starts at -0% for solo, -50% for two, -78% for three, -87% for four, etc. Penalty is applied after Defenseless Penalty."
                     itemText={`${state.blobPenalty ? `${state.blobPenalty}%` : '--'}`}
+                    demphasized={!state.blobPenalty}
                   />
                 </li>
                 <li className="ItemList-item">
@@ -259,6 +298,7 @@ function App() {
                     itemName="Ship Size Multiplier"
                     itemTooltip="A bonus/penalty from -50% to 20% depending on average size of attacking ships. For example: Smaller ships blowing up bigger ships get a bonus or bigger ships blowing up smaller ships get a penalty. Penalty is applied after blob penalty."
                     itemText={`${state.shipSizeMultiplier > 0 ? `+${state.shipSizeMultiplier}%` : state.shipSizeMultiplier < 0 ? `${state.shipSizeMultiplier}%` : '--'}`}
+                    demphasized={!state.shipSizeMultiplier}
                   />
                   <NestedItemList className="ItemList">
                     {zkillPointsState.attackers.map((ship) => (

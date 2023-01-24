@@ -7,8 +7,8 @@ const THEMES = {
   light: createTheme({
     palette: {
       background: {
-        default: '#f9f9f9',
-        paper: '#fff',
+        default: '#fefefe',
+        paper: '#fefefe',
       },
       primary: {
         main: '#1c6f95',
@@ -16,11 +16,12 @@ const THEMES = {
       error: {
         main: '#f00',
       },
-      // info: {
-      //   main: '#2a9fd6',
-      // },
       success: {
         main: '#008000',
+      },
+      text: {
+        primary: '#6f6f6f',
+        secondary: '#000',
       },
     },
   }),
@@ -28,8 +29,8 @@ const THEMES = {
     palette: {
       mode: 'dark',
       background: {
-        default: '#111111',
-        paper: '#000000',
+        default: '#000',
+        paper: '#111',
       },
       primary: {
         main: '#2a9fd6',
@@ -42,6 +43,11 @@ const THEMES = {
       },
       warning: {
         main: '#fcc204',
+      },
+      divider: 'rgba(255, 255, 255, 0.333)',
+      text: {
+        primary: '#8f8f8f',
+        secondary: '#fff',
       },
     },
   }),
