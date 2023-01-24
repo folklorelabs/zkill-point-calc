@@ -9,27 +9,17 @@ import { ColorModeProvider } from './contexts/ColorMode';
 import { SnackbarProvider } from 'notistack';
 import reportWebVitals from './reportWebVitals';
 
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-  },
-});
-
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={darkTheme}>
-      <ColorModeProvider>
-        <SnackbarProvider maxSnack={3}>
-          <ZkillPointsProvider>
-            <CssBaseline />
-            <App />
-          </ZkillPointsProvider>
-        </SnackbarProvider>
-      </ColorModeProvider>
-    </ThemeProvider>
+    <ColorModeProvider>
+      <SnackbarProvider maxSnack={3}>
+        <ZkillPointsProvider>
+          <CssBaseline />
+          <App />
+        </ZkillPointsProvider>
+      </SnackbarProvider>
+    </ColorModeProvider>
   </React.StrictMode>
 );
 
