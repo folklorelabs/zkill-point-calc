@@ -19,6 +19,10 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "fetch:items": "node ./scripts/fetchData.js",
+    "fetch:ships": "node ./scripts/parseShipsAndFetchData.js",
+    "fetch:modules": "node ./scripts/parseModulesAndFetchData.js",
+    "fetch": "npm run fetch:items && npm run fetch:ships && npm run fetch:modules",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const csv = require('csvtojson');
 
+const ensureRecursiveSync = require('./utils/ensureRecursiveSync');
+
 const BASE_DUMP_URL = 'https://www.fuzzwork.co.uk/dump/latest';
 
 async function getCsv(url) {
@@ -14,7 +16,9 @@ async function getCsv(url) {
 
 async function getAndSaveCsv(csvName) {
   const data = await getCsv(`${BASE_DUMP_URL}/${csvName}.csv`);
-  await fs.writeFileSync(path.resolve(__dirname, `../temp/${csvName}.json`), JSON.stringify(data));
+  const dest = path.resolve(__dirname, `../temp/${csvName}.json`);
+  ensureRecursiveSync(path.dirname(dest));
+  await fs.writeFileSync(dest, JSON.stringify(data));
   return data;
 }
 
