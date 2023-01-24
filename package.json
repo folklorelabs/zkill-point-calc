@@ -20,7 +20,7 @@
   },
   "scripts": {
     "fetch:items": "node ./scripts/fetchData.js",
-    "fetch:ships": "node ./scripts/parseShipsAndFetchData.js",
+    "fetch:ships": "node ./scripts/parseShipsAndFetchRigData.js",
     "fetch:modules": "node ./scripts/parseModulesAndFetchData.js",
     "fetch": "npm run fetch:items && npm run fetch:ships && npm run fetch:modules",
     "start": "react-scripts start",
