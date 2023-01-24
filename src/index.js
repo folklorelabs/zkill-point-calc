@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import './index.styles.js';
-import CssBaseline from '@mui/material/CssBaseline';
 import App from './components/App';
 import { ZkillPointsProvider } from './contexts/ZkillPoints';
 import { ColorModeProvider } from './contexts/ColorMode';
@@ -15,7 +14,6 @@ root.render(
     <ColorModeProvider>
       <SnackbarProvider maxSnack={3}>
         <ZkillPointsProvider>
-          <CssBaseline />
           <App />
         </ZkillPointsProvider>
       </SnackbarProvider>
