@@ -141,6 +141,7 @@ function App() {
           <Autocomplete
             id="attacker-select"
             multiple
+            disableCloseOnSelect
             limitTags={2}
             options={availableAttackers}
             value={zkillPointsState.attackers}
