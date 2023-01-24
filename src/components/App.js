@@ -309,7 +309,7 @@ function App() {
                   <Item
                     itemImageSrc={`https://images.evetech.net/alliances/1354830081/logo?size=64`}
                     itemName="Blob Penalty"
-                    itemTooltip="A penalty from -0% to -99.9999...% based on the number of attackers. Starts at -0% for solo, -50% for two, -78% for three, -87% for four, etc. Penalty is applied after Defenseless Penalty."
+                    itemTooltip="A penalty from -0% to -100% based on the number of attackers. Starts at -0% for solo, -50% for two, -78% for three, -87% for four, etc. Penalty is applied after Defenseless Penalty."
                     itemText={`${state.blobPenalty ? `${state.blobPenalty}%` : '--'}`}
                   />
                 </li>
