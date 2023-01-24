@@ -15,7 +15,7 @@ async function getCsv(url) {
   });
 }
 
-async function getEveDataDump(dataName, destDir=DEFAULT_DUMP_DIR) {
+async function getFuzzworkDataDump(dataName, destDir=DEFAULT_DUMP_DIR) {
   const data = await getCsv(`${BASE_DUMP_URL}/${dataName}.csv`);
   const dest = path.resolve(process.cwd(), `${destDir}/${dataName}.json`);
   ensureRecursiveSync(path.dirname(dest));
@@ -23,4 +23,4 @@ async function getEveDataDump(dataName, destDir=DEFAULT_DUMP_DIR) {
   return data;
 }
 
-module.exports = getEveDataDump;
+module.exports = getFuzzworkDataDump;
