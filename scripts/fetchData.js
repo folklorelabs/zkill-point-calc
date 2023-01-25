@@ -7,9 +7,11 @@ const getAllTypesByCategory = require('./getAllTypesByCategory');
 async function getShips() {
     const ships = await getAllTypesByCategory('Ship');
     const structures = await getAllTypesByCategory('Structure');
+    // const entities = await getAllTypesByCategory('Entity');
     const allShips = [
         ...ships,
         ...structures,
+        // ...entities,
     ];
 
     // look up attr ids
@@ -25,7 +27,7 @@ async function getShips() {
             name: ship.typeName,
             group: ship.groupName,
             category: ship.categoryName,
-            rigSize: rigSize ? rigSize.value : 0,
+            rigSize: rigSize ? rigSize.value : 1,
         };
     });
 
@@ -34,6 +36,7 @@ async function getShips() {
         id: '30193',
         name: 'Rat',
         group: 'Rat',
+        category: 'Entity',
         rigSize: 1,
     });
 

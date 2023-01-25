@@ -63,7 +63,7 @@ function ShipIconOption({ ship, className, ...params }) {
         src={`https://images.evetech.net/types/${ship.id}/icon?size=32`}
         alt=""
       />
-      <span>{ship.name}</span>
+      <span>{ship.name} - {Math.pow(5, ship.rigSize)}</span>
     </li>
   );
 }
@@ -102,7 +102,7 @@ function App() {
   const availableAttackers = useMemo(() => {
     return [
       ...SHIPS,
-    ].sort((a, b) => `${a.rigSize} ${a.group}`.localeCompare(`${b.rigSize} ${b.group}`));
+    ].sort((a, b) => `${a.category} ${a.group} ${a.rigSize}`.localeCompare(`${b.category} ${b.group} ${b.rigSize}`));
   }, []);
   // const averageAttackerSize = useMemo(() => {
   //   const attackerShips = zkillPointsState.attackers;
@@ -154,7 +154,7 @@ function App() {
               options={availableAttackers}
               value={zkillPointsState.attackers}
               isOptionEqualToValue={(option, value) => false}
-              groupBy={(option) => `${option.group} (${Math.pow(5, option.rigSize)} points)`}
+              groupBy={(option) => `${option.category !== 'Ship' ? `${option.category} - ${option.group}` : option.group}`}
               getOptionLabel={(option) => option.name}
               sx={{ width: 320, maxWidth: '100%' }}
               renderInput={(params) => <TextField label="Attacker Ships" variant="standard" {...params} />}
@@ -175,7 +175,7 @@ function App() {
             <Typography variant="body2" sx={{ m: 2, }}>
               This is a "pointless" tool that simulates and breaks down the point value of <Link href="https://zkillboard.com/" target="_blank" rel="noreferrer">zkillboard</Link> killmails.
               Add a ship fit (in <Link href="https://www.eveonline.com/news/view/import-export-fittings" target="_blank" rel="noreferrer">EFT format</Link>) and select some attacker ships to get started.
-              Note that structures are not currently supported as they are only ever worth 1 point.
+              Note that all non-player attackers are valued the same. For optimization purposes we've added a single option titled "Rat" in the Attacker Ships dropdown.
             </Typography>
           </div>
         </div>
