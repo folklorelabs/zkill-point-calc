@@ -129,7 +129,7 @@ function App() {
           <FormControl sx={{ p: 2, maxWidth: '100%'  }}>
             <TextField
               id="eft-input"
-              label="Victim Fit (EFT Format)"
+              label="Victim Fit"
               multiline
               maxRows={15}
               variant="standard"
