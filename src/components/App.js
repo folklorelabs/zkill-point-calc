@@ -219,7 +219,7 @@ function App() {
           <Box className="PointBreakdown" sx={{ maxWidth: 900, margin: '80px auto 180px', padding: '0 30px', columnGap: '40px' }}>
             <Box className="PointBreakdown-victim" sx={{ marginBottom: '60px' }}>
               <Typography variant="h6" className="PointBreakdown-headline">
-                Point Summary
+                Point Summary (<TypeEmphasis>{state.basePoints + state.dangerFactor}</TypeEmphasis>)
               </Typography>
               <Divider sx={{ margin: '0.45em 0 0' }} />
               <ul className="ItemList">
