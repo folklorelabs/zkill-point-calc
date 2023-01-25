@@ -3,8 +3,6 @@ import {
 } from 'react';
 import {
   useZkillPointsContext,
-  loadVictim,
-  loadAttackers,
   getBasePoints,
   getDangerFactor,
   getBlobPenalty,
@@ -12,88 +10,33 @@ import {
   getTotalPoints,
 } from '../contexts/ZkillPoints';
 
-import { debounce } from 'throttle-debounce';
-import { useSnackbar } from 'notistack';
-
 import {
   Box,
   Typography,
-  FormControl,
   Link,
-  Autocomplete,
-  TextField,
   Divider,
-  Chip,
   Popover,
+  Button,
 } from '@mui/material';
 
-import { styled } from '@mui/system';
+import {
+  Launch as LaunchIcon,
+  IosShare as IosShareIcon,
+} from '@mui/icons-material';
 
 import Item from './Item';
 import AppToolbar from './AppToolbar';
+import AppControls from './AppControls';
 import { TypeEmphasis } from './TypeEmphasis';
 
-import SHIPS from '../data/ships.json';
 import  {
   NestedItemList,
 } from './App.styles.js';
 import './App.css';
 import useSimUrl from '../hooks/useSimUrl';
-import { useTheme } from '@emotion/react';
-
-const GroupHeader = styled('div')(({ theme }) => ({
-  position: 'sticky',
-  top: '-8px',
-  padding: '0.4em 1em',
-  color: 'rgba(theme.palette.text.secondary, 0.8)',
-  backgroundColor: theme.palette.background.default,
-}));
-
-const GroupItems = styled('ul')({
-  padding: 0,
-});
-
-function ShipIconOption({ ship, className, ...params }) {
-  const theme = useTheme();
-  return (
-    <li className={`ShipIconOption ${className}`} style={{ backgroundColor: theme.palette.background.default, color: theme.palette.text.secondary }} {...params}>
-      <img
-        loading="lazy"
-        className="ShipIconOption-image"
-        src={`https://images.evetech.net/types/${ship.id}/icon?size=32`}
-        alt=""
-      />
-      <span>{ship.name} - {Math.pow(5, ship.rigSize)}</span>
-    </li>
-  );
-}
-
-function ShipIconChip({ ship, ...params }) {
-  const theme = useTheme();
-  return (
-    <Chip
-      sx={{ color: theme.palette.text.secondary }}
-      avatar={(<img
-        className="ShipIconChip-image"
-        src={`https://images.evetech.net/types/${ship.id}/icon?size=32`}
-        alt=""
-      />)}
-      label={ship.name}
-      {...params}
-    />
-  );
-}
-
-// const TAGLINES = [
-//   (<>"What's the <TypeEmphasis>point</TypeEmphasis> of this anyway?"</>),
-//   (<>"zKillboard points really don't matter (that's what I tell myself anyway)"</>),
-// ];
-// const TAGLINE = TAGLINES[Math.floor(Math.random() * TAGLINES.length)];
-const TAGLINE = (<>For predicting zKillboard point values</>);
 
 function App() {
-  const { enqueueSnackbar } = useSnackbar();
-  const { zkillPointsState, zkillPointsDispatch } = useZkillPointsContext();
+  const { zkillPointsState } = useZkillPointsContext();
   const state = useMemo(() => {
     const dangerFactor = getDangerFactor(zkillPointsState);
     return {
@@ -106,11 +49,6 @@ function App() {
       totalPoints: getTotalPoints(zkillPointsState),
     };
   }, [zkillPointsState]);
-  const availableAttackers = useMemo(() => {
-    return [
-      ...SHIPS,
-    ].sort((a, b) => `${a.category} ${a.group} ${a.rigSize}`.localeCompare(`${b.category} ${b.group} ${b.rigSize}`));
-  }, []);
   // const averageAttackerSize = useMemo(() => {
   //   const attackerShips = zkillPointsState.attackers;
   //   return Math.max(1, attackerShips.reduce((total, ship) => {
@@ -118,127 +56,46 @@ function App() {
   //   }, 0) / attackerShips.length);
   // }, [zkillPointsState]);
   const url = useSimUrl();
-  const [popAnchor, setPopAnchor] = useState(null);
+  const [copyPopAnchor, setCopyPopAnchor] = useState(null);
   
   return (
     <Box sx={{ width: '100%', maxWidth: 1050, margin: '0 auto', textAlign: 'center', }}>
       <AppToolbar />
-      <Box>
-        <div className="App-header">
-          <a className="App-headlineLink" href="/">
-            <TypeEmphasis>
-              <Typography variant="h4" className="App-headline">Killmail Simulator</Typography>
-            </TypeEmphasis>
-          </a>
-          <Typography  variant="subtitle" className="App-tagline">
-            {TAGLINE}
-          </Typography>
-        </div>
-        <div className="Controls">
-          <FormControl sx={{ p: 2, maxWidth: '100%'  }}>
-            <TextField
-              id="eft-input"
-              label="Victim Fit"
-              multiline
-              maxRows={15}
-              variant="standard"
-              sx={{ width: 320, maxWidth: '100%' }}
-              onChange={debounce(300, (e) => {
-                if (!e.target.value) return;
-                try {
-                  zkillPointsDispatch(loadVictim(e.target.value));
-                } catch(err) {
-                  enqueueSnackbar(`${err}`, { variant: 'error' });
-                }
-              })}
-            />
-            <Typography variant="body2" sx={{ fontStyle: 'italic', mt: 1 }}>
-              Fit must be in <Link href="https://www.eveonline.com/news/view/import-export-fittings" target="_blank" rel="noreferrer">EFT format</Link>.
-            </Typography>
-          </FormControl>
-          <FormControl sx={{ p: 2, maxWidth: '100%' }}>
-            <Autocomplete
-              id="attacker-select"
-              multiple
-              disableCloseOnSelect
-              clearOnEscape
-              limitTags={1}
-              options={availableAttackers}
-              value={zkillPointsState.attackers}
-              isOptionEqualToValue={(option, value) => false}
-              groupBy={(option) => `${option.category !== 'Ship' ? `${option.category} - ${option.group}` : option.group}`}
-              getOptionLabel={(option) => option.name}
-              sx={{ width: 320, maxWidth: '100%' }}
-              renderInput={(params) => <TextField label="Attackers" variant="standard" {...params} />}
-              renderTags={(tagValue, getTagProps) => (tagValue.map((option, index) => <ShipIconChip key={option.id} ship={option} {...getTagProps({ index })} />))}
-              renderOption={(params, option) => (<ShipIconOption key={option.id} ship={option} {...params} />)}
-              renderGroup={(params) => (
-                <li key={params.group}>
-                  <GroupHeader>{params.group}</GroupHeader>
-                  <GroupItems>{params.children}</GroupItems>
-                </li>
-              )}
-              onChange={(event, newValue) => {
-                zkillPointsDispatch(loadAttackers(newValue));
-              }}
-            />
-            <Typography variant="body2" sx={{ fontStyle: 'italic', mt: 1 }}>
-              Select the "Rat" option for any non-player attacker.
-            </Typography>
-          </FormControl>
-        </div>
-      </Box>
+      <AppControls />
       {state.shipInfo ? (
-        <>
+        <Box sx={{ position: 'relative' }}>
           <Divider sx={{ margin: '110px 0' }} />
+          <Box sx={{ position: 'absolute', top: '0.5em', right: 0, left: 0, textAlign: 'right' }}>
+            {zkillPointsState.zkillId ? (
+              <Button
+                sx={{ ml: 1 }}
+                endIcon={<LaunchIcon />}
+                href={`https://zkillboard.com/kill/${zkillPointsState.zkillId}/`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                zKill Killmail
+              </Button>
+            ) : ''}
+            <Button
+              sx={{ ml: 1 }}
+              onClick={(e) => {
+                e.preventDefault();
+                navigator.clipboard.writeText(url);
+                setCopyPopAnchor(e.currentTarget);
+              }}
+              endIcon={<IosShareIcon />}
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Share
+            </Button>
+          </Box>
           <Box sx={{ textAlign: 'center', margin: '0 auto', maxWidth: 760, px: 2, }}>
             <Typography variant="h4" gutterBottom>
               This <TypeEmphasis>{state.shipInfo.name}</TypeEmphasis> is valued at <TypeEmphasis>{state.totalPoints} points</TypeEmphasis> based on the breakdown below.
             </Typography>
-            <Link
-              href={url}
-              onClick={(e) => {
-                e.preventDefault();
-                navigator.clipboard.writeText(url);
-                setPopAnchor(e.currentTarget);
-              }}
-            >
-              Share this simulation
-            </Link>
-            {zkillPointsState.zkillId ? (
-              <>
-                {' | '}
-                <Link
-                  href={`https://zkillboard.com/kill/${zkillPointsState.zkillId}/`}
-                  target="_blank"
-                  rel="noreferrer"
-                  // onClick={(e) => {
-                  //   e.preventDefault();
-                  //   navigator.clipboard.writeText(`https://zkillboard.com/kill/${zkillPointsState.zkillId}/`);
-                  //   setPopAnchor(e.currentTarget);
-                  // }}
-                >
-                  Killmail on zkillboard
-                </Link>
-              </>
-            ) : ''}
-            <Popover
-              open={Boolean(popAnchor)}
-              anchorEl={popAnchor}
-              onClose={() => {
-              setPopAnchor(null);
-              }}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'center',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'center',
-              }}
-            >
-              <Typography sx={{ p: 2 }}>Link to this simulation copied to clipboard</Typography>
-            </Popover>
           </Box>
           <Box className="PointBreakdown" sx={{ maxWidth: 900, margin: '80px auto 180px', padding: '0 30px', columnGap: '40px' }}>
             <Box className="PointBreakdown-victim" sx={{ marginBottom: '60px' }}>
@@ -357,7 +214,7 @@ function App() {
               </ul>
             </Box>
           </Box>
-        </>
+        </Box>
       ) : ''}
       <Box className="App-instructions" sx={{ my: 6, }}>
         <Typography variant="body2">
@@ -365,6 +222,23 @@ function App() {
           All <Link href="https://zkillboard.com/information/legal/" target="_blank" rel="noreferrer">EVE related materials</Link> are property of <Link href="http://www.ccpgames.com/" target="_blank" rel="noreferrer">CCP Games</Link>.
         </Typography>
       </Box>
+      <Popover
+        open={Boolean(copyPopAnchor)}
+        anchorEl={copyPopAnchor}
+        onClose={() => {
+        setCopyPopAnchor(null);
+        }}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+      >
+        <Typography sx={{ p: 2 }}>Link to this simulation copied to clipboard</Typography>
+      </Popover>
     </Box>
   );
 }

@@ -2,22 +2,23 @@ import {
     useState,
 } from 'react';
 import { useColorModeContext } from '../contexts/ColorMode';
-import useSimUrl from '../hooks/useSimUrl';
 
 import { useTheme } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
-import Popover from '@mui/material/Popover';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import IosShareIcon from '@mui/icons-material/IosShare';
+
+import {
+  Button,
+  Tooltip,
+  Typography,
+  Popover,
+  Box,
+  Toolbar,
+} from '@mui/material/';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 
 function AppToolbar() {
   const theme = useTheme();
   const colorMode = useColorModeContext();
-  const url = useSimUrl();
   const [popAnchor, setPopAnchor] = useState(null);  
   return (
     <Box>
@@ -25,19 +26,11 @@ function AppToolbar() {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1, textAlign: 'left' }}>
           {/* Killmail Simulator */}
         </Typography>
-        <IconButton
-          sx={{ ml: 1 }}
-          onClick={(e) => {
-            navigator.clipboard.writeText(url);
-            setPopAnchor(e.currentTarget);
-          }}
-          color="inherit"
-        >
-          {<IosShareIcon />}
-        </IconButton>
-        <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
-          {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-        </IconButton>
+        <Tooltip title="Toggle dark/light mode">
+          <Button sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit" endIcon={theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}>
+              {theme.palette.mode} mode
+          </Button>
+        </Tooltip>
         <Popover
           open={Boolean(popAnchor)}
           anchorEl={popAnchor}
