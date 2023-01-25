@@ -126,13 +126,14 @@ function App() {
           <Typography  variant="subtitle" className="App-tagline">"What's the <TypeEmphasis>point</TypeEmphasis> of this anyway?"</Typography>
         </div>
         <div className="Controls">
-          <FormControl sx={{ m: 1, minWidth: 320 }}>
+          <FormControl sx={{ p: 2, maxWidth: '100%'  }}>
             <TextField
               id="eft-input"
               label="Victim Fit (EFT Format)"
               multiline
               maxRows={15}
               variant="standard"
+              sx={{ width: 320, maxWidth: '100%' }}
               onChange={debounce(300, (e) => {
                 if (!e.target.value) return;
                 try {
@@ -143,7 +144,7 @@ function App() {
               })}
             />
           </FormControl>
-          <FormControl sx={{ m: 1, minWidth: 320 }}>
+          <FormControl sx={{ p: 2, maxWidth: '100%' }}>
             <Autocomplete
               id="attacker-select"
               multiple
@@ -155,7 +156,7 @@ function App() {
               isOptionEqualToValue={(option, value) => false}
               groupBy={(option) => `${option.group} (${Math.pow(5, option.rigSize)} points)`}
               getOptionLabel={(option) => option.name}
-              sx={{ width: 320 }}
+              sx={{ width: 320, maxWidth: '100%' }}
               renderInput={(params) => <TextField label="Attacker Ships" variant="standard" {...params} />}
               renderTags={(tagValue, getTagProps) => (tagValue.map((option, index) => <ShipIconChip key={option.id} ship={option} {...getTagProps({ index })} />))}
               renderOption={(params, option) => (<ShipIconOption key={option.id} ship={option} {...params} />)}
@@ -171,7 +172,7 @@ function App() {
             />
           </FormControl>
           <div className="App-instructions">
-            <Typography variant="body2">
+            <Typography variant="body2" sx={{ m: 2, }}>
               This is a tool for simulating the point value of <Link href="https://zkillboard.com/" target="_blank" rel="noreferrer">zkillboard</Link> killmails.
               Add a ship fit (in <Link href="https://www.eveonline.com/news/view/import-export-fittings" target="_blank" rel="noreferrer">EFT format</Link>) and select some attacker ships to get started.
             </Typography>
@@ -180,9 +181,9 @@ function App() {
       </Box>
       {state.shipInfo ? (
         <>
-          <Divider sx={{ margin: '3em 0' }} />
-          <Box sx={{ margin: '0 auto', maxWidth: 760 }}>
-            <Typography variant="h4" gutterBottom sx={{ textAlign: 'center' }}>
+          <Divider sx={{ margin: '110px 0' }} />
+          <Box sx={{ textAlign: 'center', margin: '0 auto', maxWidth: 760, px: 2, }}>
+            <Typography variant="h4" gutterBottom>
               This <TypeEmphasis>{state.shipInfo.name}</TypeEmphasis> is valued at <TypeEmphasis>{state.totalPoints} points</TypeEmphasis> based on the breakdown below.
             </Typography>
             <div>
@@ -215,8 +216,8 @@ function App() {
               </Popover>
             </div>
           </Box>
-          <div className="PointBreakdown">
-            <div className="PointBreakdown-victim">
+          <Box className="PointBreakdown" sx={{ maxWidth: 900, margin: '80px auto 180px', padding: '0 30px', columnGap: '40px' }}>
+            <Box className="PointBreakdown-victim" sx={{ marginBottom: '60px' }}>
               <Typography variant="h6" className="PointBreakdown-headline">
                 Point Summary
               </Typography>
@@ -267,8 +268,8 @@ function App() {
                   </NestedItemList>
                 </li>
               </ul>
-            </div>
-            <div className="PointBreakdown-attacker">
+            </Box>
+            <Box className="PointBreakdown-attacker">
               <Typography variant="h6" className="PointBreakdown-headline">
                 Modifiers
               </Typography>
@@ -330,8 +331,8 @@ function App() {
                   ) : ''} */}
                 </li>
               </ul>
-            </div>
-          </div>
+            </Box>
+          </Box>
         </>
       ) : ''}
     </Box>
