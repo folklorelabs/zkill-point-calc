@@ -84,6 +84,13 @@ function ShipIconChip({ ship, ...params }) {
   );
 }
 
+// const TAGLINES = [
+//   (<>"What's the <TypeEmphasis>point</TypeEmphasis> of this anyway?"</>),
+//   (<>"zKillboard points really don't matter (that's what I tell myself anyway)"</>),
+// ];
+// const TAGLINE = TAGLINES[Math.floor(Math.random() * TAGLINES.length)];
+const TAGLINE = (<>"What's the <TypeEmphasis>point</TypeEmphasis> of this anyway?"</>);
+
 function App() {
   const { enqueueSnackbar } = useSnackbar();
   const { zkillPointsState, zkillPointsDispatch } = useZkillPointsContext();
@@ -123,7 +130,9 @@ function App() {
               <Typography variant="h4" className="App-headline">Killmail Simulator</Typography>
             </TypeEmphasis>
           </a>
-          <Typography  variant="subtitle" className="App-tagline">"What's the <TypeEmphasis>point</TypeEmphasis> of this anyway?"</Typography>
+          <Typography  variant="subtitle" className="App-tagline">
+            {TAGLINE}
+          </Typography>
         </div>
         <div className="Controls">
           <FormControl sx={{ p: 2, maxWidth: '100%'  }}>
@@ -160,7 +169,7 @@ function App() {
               groupBy={(option) => `${option.category !== 'Ship' ? `${option.category} - ${option.group}` : option.group}`}
               getOptionLabel={(option) => option.name}
               sx={{ width: 320, maxWidth: '100%' }}
-              renderInput={(params) => <TextField label="Attacker Ships" variant="standard" {...params} />}
+              renderInput={(params) => <TextField label="Attackers" variant="standard" {...params} />}
               renderTags={(tagValue, getTagProps) => (tagValue.map((option, index) => <ShipIconChip key={option.id} ship={option} {...getTagProps({ index })} />))}
               renderOption={(params, option) => (<ShipIconOption key={option.id} ship={option} {...params} />)}
               renderGroup={(params) => (
@@ -177,13 +186,6 @@ function App() {
               Select the "Rat" option for any non-player attacker.
             </Typography>
           </FormControl>
-          <Box className="App-instructions" sx={{ my: 2, }}>
-            <Typography variant="body2" sx={{ mb: 2, }}>
-              This is a tool that simulates and breaks down the point value of <Link href="https://zkillboard.com/" target="_blank" rel="noreferrer">zKillboard</Link> killmails.
-              It was brought to you by <Link href="https://zkillboard.com/character/879471236/" target="_blank" rel="noreferrer">peebun</Link> and has no affiliation with zKillboard.
-              All <Link href="https://zkillboard.com/information/legal/" target="_blank" rel="noreferrer">EVE related materials</Link> are property of <Link href="http://www.ccpgames.com/" target="_blank" rel="noreferrer">CCP Games</Link>.
-            </Typography>
-          </Box>
         </div>
       </Box>
       {state.shipInfo ? (
@@ -357,6 +359,12 @@ function App() {
           </Box>
         </>
       ) : ''}
+      <Box className="App-instructions" sx={{ my: 6, }}>
+        <Typography variant="body2">
+          Killmail Simulator was brought to you by <Link href="https://zkillboard.com/character/879471236/" target="_blank" rel="noreferrer">peebun</Link> and has no affiliation with zKillboard.
+          All <Link href="https://zkillboard.com/information/legal/" target="_blank" rel="noreferrer">EVE related materials</Link> are property of <Link href="http://www.ccpgames.com/" target="_blank" rel="noreferrer">CCP Games</Link>.
+        </Typography>
+      </Box>
     </Box>
   );
 }
