@@ -89,7 +89,7 @@ function ShipIconChip({ ship, ...params }) {
 //   (<>"zKillboard points really don't matter (that's what I tell myself anyway)"</>),
 // ];
 // const TAGLINE = TAGLINES[Math.floor(Math.random() * TAGLINES.length)];
-const TAGLINE = (<>"What's the <TypeEmphasis>point</TypeEmphasis> of this anyway?"</>);
+const TAGLINE = (<>For predicting zKillboard point values</>);
 
 function App() {
   const { enqueueSnackbar } = useSnackbar();
