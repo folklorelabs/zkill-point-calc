@@ -6,19 +6,25 @@ const getAllTypesByCategory = require('./getAllTypesByCategory');
 
 async function getShips() {
     const ships = await getAllTypesByCategory('Ship');
+    const structures = await getAllTypesByCategory('Structure');
+    const allShips = [
+        ...ships,
+        ...structures,
+    ];
 
     // look up attr ids
     const attrTypes = await Fuzzworks.getData('dgmAttributeTypes');
     const attrRigId = parseInt(attrTypes.find((a) => a.attributeName === 'Rig Size').attributeID, 10);
 
     // format obj to output
-    const formattedShips = ships.map((ship) => {
+    const formattedShips = allShips.map((ship) => {
         const attrs = ship.dogma_attributes;
         const rigSize = attrs && attrs.find((attr) => attr.attribute_id === attrRigId);
         return {
             id: ship.typeID,
             name: ship.typeName,
             group: ship.groupName,
+            category: ship.categoryName,
             rigSize: rigSize ? rigSize.value : 0,
         };
     });
@@ -28,12 +34,6 @@ async function getShips() {
         id: '30193',
         name: 'Rat',
         group: 'Rat',
-        rigSize: 1,
-    });
-    formattedShips.push({
-        id: '35833',
-        name: 'Structure',
-        group: 'Structure',
         rigSize: 1,
     });
 

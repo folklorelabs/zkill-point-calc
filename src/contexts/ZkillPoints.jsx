@@ -44,6 +44,7 @@ export function parseUrlLegacy() {
   const url = new URL(window.location);
   const params = url.searchParams;
   const ship = SHIPS.find((s) => s.name === params.get('shipInfo'));
+  if (!ship) return {};
   const victimModulesQuery = params.get('victimModules') || '';
   const victimModules = victimModulesQuery.split(',')
     .map((moduleName) => MODULES.find((m) => m.name === moduleName))
@@ -88,7 +89,7 @@ export function parseUrl() {
         })),
       ];
     }, []);
-  const shipInfo = victimModules.length && {
+  const shipInfo = {
     ...ship,
     modules: victimModules,
   };
@@ -253,8 +254,9 @@ export function getShipSizeMultiplier(state) {
 }
 
 export function getTotalPoints(state) {
-  if (state.shipInfo && state.shipInfo.group === 'Capsule') return 1;
-  if (state.attackers.find((a) => a.group === 'Structure')) return 1;
+  if (!state.shipInfo) return 0;
+  if (state.shipInfo.group === 'Capsule') return 1;
+  if (state.attackers.find((a) => a.category === 'Structure')) return 1;
   if (state.attackers.length && !state.attackers.reduce((all, a) => all || a.name !== 'Rat', false)) return 1;
 
   const basePoints = getBasePoints(state);
@@ -295,7 +297,8 @@ export function ZkillPointsProvider({
     const shipInfo = data.shipInfo || legacyData.shipInfo;
     const attackers = data.attackers || legacyData.attackers;
     const zkillId = data.zkillId;
-    if (shipInfo && shipInfo.id && shipInfo.name && shipInfo.modules.length) {
+    console.log(shipInfo, attackers, zkillId);
+    if (shipInfo && shipInfo.id && shipInfo.name) {
       zkillPointsDispatch(loadVictim(shipInfo));
     }
     if (attackers && attackers.length) {

@@ -27,7 +27,7 @@ import {
   Popover,
 } from '@mui/material';
 
-import { styled, lighten, darken } from '@mui/system';
+import { styled } from '@mui/system';
 
 import Item from './Item';
 import AppToolbar from './AppToolbar';
@@ -139,7 +139,7 @@ function App() {
                 try {
                   zkillPointsDispatch(loadVictim(e.target.value));
                 } catch(err) {
-                  enqueueSnackbar('Error parsing EFT. Note that all structures (including POS towers and arrays) are only ever worth 1 point.', { variant: 'error' });
+                  enqueueSnackbar(`${err}`, { variant: 'error' });
                 }
               })}
             />
@@ -173,8 +173,9 @@ function App() {
           </FormControl>
           <div className="App-instructions">
             <Typography variant="body2" sx={{ m: 2, }}>
-              This is a tool for simulating the point value of <Link href="https://zkillboard.com/" target="_blank" rel="noreferrer">zkillboard</Link> killmails.
+              This is a "pointless" tool that simulates and breaks down the point value of <Link href="https://zkillboard.com/" target="_blank" rel="noreferrer">zkillboard</Link> killmails.
               Add a ship fit (in <Link href="https://www.eveonline.com/news/view/import-export-fittings" target="_blank" rel="noreferrer">EFT format</Link>) and select some attacker ships to get started.
+              Note that structures are not currently supported as they are only ever worth 1 point.
             </Typography>
           </div>
         </div>
