@@ -297,7 +297,6 @@ export function ZkillPointsProvider({
     const shipInfo = data.shipInfo || legacyData.shipInfo;
     const attackers = data.attackers || legacyData.attackers;
     const zkillId = data.zkillId;
-    console.log(shipInfo, attackers, zkillId);
     if (shipInfo && shipInfo.id && shipInfo.name) {
       zkillPointsDispatch(loadVictim(shipInfo));
     }
