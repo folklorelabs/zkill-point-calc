@@ -143,6 +143,9 @@ function App() {
                 }
               })}
             />
+            <Typography variant="body2" sx={{ fontStyle: 'italic', mt: 1 }}>
+              Fit must be in <Link href="https://www.eveonline.com/news/view/import-export-fittings" target="_blank" rel="noreferrer">EFT format</Link>.
+            </Typography>
           </FormControl>
           <FormControl sx={{ p: 2, maxWidth: '100%' }}>
             <Autocomplete
@@ -170,14 +173,17 @@ function App() {
                 zkillPointsDispatch(loadAttackers(newValue));
               }}
             />
-          </FormControl>
-          <div className="App-instructions">
-            <Typography variant="body2" sx={{ m: 2, }}>
-              This is a "pointless" tool that simulates and breaks down the point value of <Link href="https://zkillboard.com/" target="_blank" rel="noreferrer">zkillboard</Link> killmails.
-              Add a ship fit (in <Link href="https://www.eveonline.com/news/view/import-export-fittings" target="_blank" rel="noreferrer">EFT format</Link>) and select some attacker ships to get started.
-              Note that all non-player attackers are valued the same. For optimization purposes we've added a single option titled "Rat" in the Attacker Ships dropdown.
+            <Typography variant="body2" sx={{ fontStyle: 'italic', mt: 1 }}>
+              Select the "Rat" option for any non-player attacker.
             </Typography>
-          </div>
+          </FormControl>
+          <Box className="App-instructions" sx={{ my: 2, }}>
+            <Typography variant="body2" sx={{ mb: 2, }}>
+              This is a tool that simulates and breaks down the point value of <Link href="https://zkillboard.com/" target="_blank" rel="noreferrer">zKillboard</Link> killmails.
+              It was brought to you by <Link href="https://zkillboard.com/character/879471236/">peebun</Link> and has no affiliation with zKillboard.
+              All <Link href="https://zkillboard.com/information/legal/">EVE related materials</Link> are property of <Link href="http://www.ccpgames.com/">CCP Games</Link>.
+            </Typography>
+          </Box>
         </div>
       </Box>
       {state.shipInfo ? (
