@@ -69,7 +69,7 @@ export function parseUrlLegacy() {
 export function parseUrl() {
   const url = new URL(window.location);
   const params = url.searchParams;
-  const [shipStr, modulesStr='', attackersStr=''] = (params.get('k') || '').split('-');
+  const [shipStr, modulesStr='', attackersStr='', zkillId=''] = (params.get('k') || '').split('-');
   if (!shipStr) return {};
   const ship = SHIPS.find((s) => s.id === shipStr);
   if (!ship) return {};
@@ -108,6 +108,7 @@ export function parseUrl() {
   return {
     shipInfo,
     attackers,
+    zkillId,
   }
 }
 
@@ -115,6 +116,7 @@ export function parseUrl() {
 const INITIAL_STATE = {
   shipInfo: null,
   attackers: [],
+  zkillId: null,
 };
 
 // ACTIONS
@@ -122,6 +124,7 @@ export const ACTIONS = {
   RESET: 'RESET',
   LOAD_VICTIM: 'LOAD_VICTIM',
   LOAD_INVOLVED: 'LOAD_INVOLVED',
+  SET_ZKILL_ID: 'SET_ZKILL_ID',
 };
 export function reset() {
   return [ACTIONS.RESET];
@@ -136,6 +139,9 @@ export function loadAttackers(ships) {
     uuid: uuid(),
   }));
   return [ACTIONS.LOAD_INVOLVED, attackers];
+}
+export function setZkillId(zkillId) {
+  return [ACTIONS.SET_ZKILL_ID, zkillId];
 }
 
 // REDUCER
@@ -173,6 +179,11 @@ function REDUCER(state, [type, payload]) {
         attackers: [
           ...state.attackers.filter((ship) => ship.uuid !== payload),
         ],
+      };
+    case ACTIONS.SET_ZKILL_ID:
+      return {
+        ...state,
+        zkillId: payload,
       };
     default:
       return { ...state };
@@ -283,11 +294,15 @@ export function ZkillPointsProvider({
     const data = parseUrl();
     const shipInfo = data.shipInfo || legacyData.shipInfo;
     const attackers = data.attackers || legacyData.attackers;
+    const zkillId = data.zkillId;
     if (shipInfo && shipInfo.id && shipInfo.name && shipInfo.modules.length) {
       zkillPointsDispatch(loadVictim(shipInfo));
     }
     if (attackers && attackers.length) {
       zkillPointsDispatch(loadAttackers(attackers));
+    }
+    if (zkillId) {
+      zkillPointsDispatch(setZkillId(zkillId));
     }
   }, []);
 

@@ -186,35 +186,50 @@ function App() {
             <Typography variant="h4" gutterBottom>
               This <TypeEmphasis>{state.shipInfo.name}</TypeEmphasis> is valued at <TypeEmphasis>{state.totalPoints} points</TypeEmphasis> based on the breakdown below.
             </Typography>
-            <div>
-              <Link
-                href={url}
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigator.clipboard.writeText(url);
-                  setPopAnchor(e.currentTarget);
-                }}
-              >
-                Share this simulation
-              </Link>
-              <Popover
-                open={Boolean(popAnchor)}
-                anchorEl={popAnchor}
-                onClose={() => {
-                setPopAnchor(null);
-                }}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'center',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'center',
-                }}
-              >
-                <Typography sx={{ p: 2 }}>Link to this simulation copied to clipboard</Typography>
-              </Popover>
-            </div>
+            <Link
+              href={url}
+              onClick={(e) => {
+                e.preventDefault();
+                navigator.clipboard.writeText(url);
+                setPopAnchor(e.currentTarget);
+              }}
+            >
+              Share this simulation
+            </Link>
+            {zkillPointsState.zkillId ? (
+              <>
+                {' | '}
+                <Link
+                  href={`https://zkillboard.com/kill/${zkillPointsState.zkillId}/`}
+                  target="_blank"
+                  rel="noreferrer"
+                  // onClick={(e) => {
+                  //   e.preventDefault();
+                  //   navigator.clipboard.writeText(`https://zkillboard.com/kill/${zkillPointsState.zkillId}/`);
+                  //   setPopAnchor(e.currentTarget);
+                  // }}
+                >
+                  Killmail on zkillboard
+                </Link>
+              </>
+            ) : ''}
+            <Popover
+              open={Boolean(popAnchor)}
+              anchorEl={popAnchor}
+              onClose={() => {
+              setPopAnchor(null);
+              }}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'center',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'center',
+              }}
+            >
+              <Typography sx={{ p: 2 }}>Link to this simulation copied to clipboard</Typography>
+            </Popover>
           </Box>
           <Box className="PointBreakdown" sx={{ maxWidth: 900, margin: '80px auto 180px', padding: '0 30px', columnGap: '40px' }}>
             <Box className="PointBreakdown-victim" sx={{ marginBottom: '60px' }}>

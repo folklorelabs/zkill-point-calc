@@ -42,6 +42,11 @@ function useSimUrl() {
     }).join('.');
     killmail.push(attackerShips);
 
+    // add zkillId to killmail array
+    if (zkillPointsState.zkillId) {
+      killmail.push(zkillPointsState.zkillId);
+    }
+
     const url = new URL(window.location);
     url.searchParams.set('k', killmail.join('-'));
     window.history.replaceState({}, '', url);
