@@ -139,7 +139,7 @@ function App() {
                 try {
                   zkillPointsDispatch(loadVictim(e.target.value));
                 } catch(err) {
-                  enqueueSnackbar('Error parsing EFT. Please try again.', { variant: 'error' });
+                  enqueueSnackbar('Error parsing EFT. Note that all structures (including POS towers and arrays) are only ever worth 1 point.', { variant: 'error' });
                 }
               })}
             />
