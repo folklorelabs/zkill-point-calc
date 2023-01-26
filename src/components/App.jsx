@@ -49,11 +49,14 @@ function App() {
   const [copyPopAnchor, setCopyPopAnchor] = useState(null);
 
   return (
-    <Box>
+    <Box
+      sx={{
+        textAlign: 'center',
+      }}
+    >
       <Box
         sx={{
           width: '100%',
-          textAlign: 'center',
           margin: '0 auto',
           maxWidth: 900,
         }}
