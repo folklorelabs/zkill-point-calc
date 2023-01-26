@@ -197,7 +197,7 @@ function App() {
           </Box>
         </Box>
       )}
-      <Box className="App-instructions" sx={{ px: 2, my: 6 }}>
+      <Box className="App-instructions" sx={{ textAlign: 'center', px: 2, my: 6 }}>
         <Typography variant="body2">
           Killmail Simulator was brought to you by
           {' '}
