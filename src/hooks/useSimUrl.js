@@ -49,7 +49,7 @@ function useSimUrl() {
 
     const urlObj = new URL(window.location);
     urlObj.searchParams.set('k', killmail.join('-'));
-    window.history.replaceState({}, '', urlObj);
+    window.history.pushState({}, '', urlObj);
     return `${urlObj}`;
   }, [zkillPointsState]);
   return url;
