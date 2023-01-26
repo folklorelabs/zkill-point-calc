@@ -16,7 +16,8 @@ function ResetSimButton() {
       <IconButton
         // endIcon={<DeleteIcon />}
         onClick={() => {
-          zkillPointsDispatch(resetZkill());
+          const confirm = window.confirm('Are you sure you want to reset reset the simulation?');
+          if (confirm) zkillPointsDispatch(resetZkill());
         }}
       >
         {/* Reset */}
