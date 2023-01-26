@@ -64,13 +64,4 @@
   .PointBreakdown {
     display: block;
   }
-
-  .PointBreakdown-victim,
-  .PointBreakdown-attacker {
-    width: 100%;
-  }
-
-  .PointBreakdown-headline {
-    text-align: center;
-  }
 }
