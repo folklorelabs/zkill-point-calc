@@ -67,8 +67,13 @@ export function parseUrl() {
     .reduce((all, s) => {
       const [shipId, qtyStr] = s.split('_');
       const qty = parseInt(qtyStr || 1, 10);
-      const matchingShip = SHIPS.find((sd) => sd.id === shipId);
-      if (!shipInfo) return all;
+      let matchingShip = SHIPS.find((sd) => sd.id === shipId);
+      if (!matchingShip) {
+        matchingShip = {
+          ...SHIPS.find((sd) => sd.name === 'Rat'),
+          id: shipId,
+        };
+      }
       return [
         ...all,
         ...Array.from(Array(qty || 1)).map(() => ({
