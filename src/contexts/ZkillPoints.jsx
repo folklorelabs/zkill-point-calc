@@ -137,6 +137,7 @@ function REDUCER(state, [type, payload]) {
       return {
         ...state,
         ...INITIAL_STATE,
+        url: window.location.origin,
       };
     case ACTIONS.LOAD:
       return {
