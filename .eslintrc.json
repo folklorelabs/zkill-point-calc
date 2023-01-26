@@ -1,0 +1,14 @@
+{
+  "env": {
+    "browser": true
+  },
+  "extends": [
+    "airbnb",
+    "airbnb/hooks"
+  ],
+  "rules": {
+    "no-restricted-syntax": "off",
+    "no-await-in-loop": "off",
+    "react/jsx-props-no-spreading": "off"
+  }
+}

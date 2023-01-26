@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import './index.styles.js';
+import './index.styles';
+import { SnackbarProvider } from 'notistack';
 import App from './components/App';
 import { ZkillPointsProvider } from './contexts/ZkillPoints';
 import { ColorModeProvider } from './contexts/ColorMode';
-import { SnackbarProvider } from 'notistack';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -18,7 +18,7 @@ root.render(
         </ZkillPointsProvider>
       </SnackbarProvider>
     </ColorModeProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
 
 // If you want to start measuring performance in your app, pass a function

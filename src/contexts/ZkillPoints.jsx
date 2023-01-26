@@ -5,40 +5,12 @@ import React, {
   useContext,
   useEffect,
 } from 'react';
-import PropTypes from 'prop-types';
+import { childrenProps, childrenDefaults } from '../propTypes/children';
 import SHIPS from '../data/ships.json';
 import MODULES from '../data/modules.json';
 
-// UTILS
-export function uuid() {
-  return Math.random().toString(16).slice(2);
-}
-export function parseEft(eft) {
-  const shipNameRegExp = /^\[([\w ]+)/;
-  const shipNameMatch = shipNameRegExp.exec(eft);
-  const shipName = shipNameMatch.length > 1 ? shipNameMatch[1] : null;
-  if (!shipName) throw new Error('Invalid EFT. Cannot parse ship name.');
-  const ship = SHIPS.find((s) => s.name === shipName);
-  if (!ship) throw new Error(`Invalid EFT. Unknown ship ${shipName}.`);
-  const eftLines = eft.split('\n');
-  const eftLinesClean = eftLines
-    .slice(1, eftLines.length)
-    .filter((line) => !!line)
-    .map(line => line.split(',')[0]);
-  const modules = eftLinesClean
-    .map((line) => {
-      const module = MODULES.find(module => module.name === line);
-      return module ? {
-        ...module,
-        uuid: uuid(),
-      } : null;
-    })
-    .filter((module) => !!module);
-  return {
-    ...ship,
-    modules,
-  };
-}
+import uuid from '../utils/uuid';
+import parseEft from '../utils/parseEft';
 
 export function parseUrlLegacy() {
   const url = new URL(window.location);
@@ -60,17 +32,17 @@ export function parseUrlLegacy() {
   const attackersQuery = params.get('attackers') || '';
   const attackers = attackersQuery.split(',')
     .map((shipName) => SHIPS.find((s) => s.name === shipName))
-    .filter((ship) => !!ship);
+    .filter((matchingShip) => !!matchingShip);
   return {
     shipInfo,
     attackers,
-  }
+  };
 }
 
 export function parseUrl() {
   const url = new URL(window.location);
   const params = url.searchParams;
-  const [shipStr, modulesStr='', attackersStr='', zkillId=''] = (params.get('k') || '').split('-');
+  const [shipStr, modulesStr = '', attackersStr = '', zkillId = ''] = (params.get('k') || '').split('-');
   if (!shipStr) return {};
   const ship = SHIPS.find((s) => s.id === shipStr);
   if (!ship) return {};
@@ -97,12 +69,12 @@ export function parseUrl() {
     .reduce((all, s) => {
       const [shipId, qtyStr] = s.split('_');
       const qty = parseInt(qtyStr || 1, 10);
-      const ship = SHIPS.find((sd) => sd.id === shipId);
+      const matchingShip = SHIPS.find((sd) => sd.id === shipId);
       if (!ship) return all;
       return [
         ...all,
         ...Array.from(Array(qty || 1)).map(() => ({
-          ...ship,
+          ...matchingShip,
         })),
       ];
     }, []);
@@ -110,7 +82,7 @@ export function parseUrl() {
     shipInfo,
     attackers,
     zkillId,
-  }
+  };
 }
 
 // STATE
@@ -194,7 +166,7 @@ function REDUCER(state, [type, payload]) {
 // GETTERS
 export function getBasePoints(state) {
   if (!state.shipInfo) return 0;
-  const basePoints = Math.pow(5, state.shipInfo.rigSize);
+  const basePoints = 5 ** state.shipInfo.rigSize;
   return basePoints;
 }
 export function getDangerFactor(state) {
@@ -204,14 +176,16 @@ export function getDangerFactor(state) {
     $metaLevel = Info::getDogma($typeID, 633);
     $meta = 1 + floor($metaLevel / 2);
     $heatDamage = Info::getDogma($typeID, 1211);
-    $dangerFactor += ((bool) $heatDamage) * $qty * $meta; // offensive/defensive modules overloading are good for pvp
-    $dangerFactor += ($itemInfo['groupID'] == 645) * $qty * $meta; // drone damange multipliers
-    $dangerFactor -= ($itemInfo['groupID'] == 54) * $qty * $meta; // Mining ships don't earn as many points
+    // offensive/defensive modules overloading are good for pvp
+    $dangerFactor += ((bool) $heatDamage) * $qty * $meta;
+    // drone damange multipliers
+    $dangerFactor += ($itemInfo['groupID'] == 645) * $qty * $meta;
+    // Mining ships don't earn as many points
+    $dangerFactor -= ($itemInfo['groupID'] == 54) * $qty * $meta;
   */
   if (!state.shipInfo) return 0;
-  const victimDangerFactor = state.shipInfo.modules.reduce((totalDanger, module) => {
-    return totalDanger + module.dangerFactor;
-  }, 0);
+  const victimDangerFactor = state.shipInfo.modules
+    .reduce((totalDanger, module) => totalDanger + module.dangerFactor, 0);
   return victimDangerFactor;
 }
 export function getBlobPenalty(state) {
@@ -235,19 +209,18 @@ export function getShipSizeMultiplier(state) {
 
         $aInfo = Info::getInfo('typeID', $shipTypeID);
         $aInfo['rigSize'] = self::getRigSize($shipTypeID);
-        $size += pow(5, ((@$aInfo['groupID'] != 29) ? @$aInfo['rigSize'] : @$shipInfo['rigSize'] + 1));
+        $size += pow(5, ((@$aInfo['groupID'] != 29)
+          ? @$aInfo['rigSize'] : @$shipInfo['rigSize'] + 1));
     }
     if ($hasChar == false) return 1;
     $avg = max(1, $size / $numAttackers);
     $modifier = min(1.2, max(0.5, $basePoints / $avg));
   */
   const basePoints = getBasePoints(state);
-  const shipInfo = state.shipInfo;
+  const { shipInfo } = state;
   const numAttackers = state.attackers.length;
   if (!shipInfo || !numAttackers) return 1;
-  const size = state.attackers.reduce((size, aInfo) => {
-    return size + Math.pow(5, aInfo.group !== 'Capsule' ? aInfo.rigSize : shipInfo.rigSize + 1);
-  }, 0);
+  const size = state.attackers.reduce((aSize, aInfo) => aSize + 5 ** (aInfo.group !== 'Capsule' ? aInfo.rigSize : shipInfo.rigSize + 1), 0);
   const avg = Math.max(1, size / numAttackers);
   const modifier = Math.min(1.2, Math.max(0.5, basePoints / avg));
   return modifier;
@@ -267,7 +240,7 @@ export function getTotalPoints(state) {
   points *= Math.max(0.01, Math.min(1, dangerFactor / 4));
 
   const blobPenaltyModifier = 1 / getBlobPenalty(state);
-  points = points * blobPenaltyModifier;
+  points *= blobPenaltyModifier;
 
   const shipSizeMultiplier = getShipSizeMultiplier(state);
   points = Math.floor(points * shipSizeMultiplier);
@@ -296,7 +269,7 @@ export function ZkillPointsProvider({
     const data = parseUrl();
     const shipInfo = data.shipInfo || legacyData.shipInfo;
     const attackers = data.attackers || legacyData.attackers;
-    const zkillId = data.zkillId;
+    const { zkillId } = data;
     if (shipInfo && shipInfo.id && shipInfo.name) {
       zkillPointsDispatch(loadVictim(shipInfo));
     }
@@ -314,11 +287,12 @@ export function ZkillPointsProvider({
     </ZkillPointsContext.Provider>
   );
 }
+ZkillPointsProvider.defaultProps = {
+  children: childrenDefaults,
+};
+
 ZkillPointsProvider.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]).isRequired,
+  children: childrenProps,
 };
 
 export function useZkillPointsContext() {

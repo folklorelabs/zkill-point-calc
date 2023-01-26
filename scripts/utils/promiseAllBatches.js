@@ -11,14 +11,14 @@
  */
 
 async function promiseAllBatches(task, items, batchSize) {
-    let position = 0;
-    let results = [];
-    while (position < items.length) {
-        const itemsForBatch = items.slice(position, position + batchSize);
-        results = [...results, ...await Promise.all(itemsForBatch.map(item => task(item)))];
-        position += batchSize;
-    }
-    return results;
+  let position = 0;
+  let results = [];
+  while (position < items.length) {
+    const itemsForBatch = items.slice(position, position + batchSize);
+    results = [...results, ...await Promise.all(itemsForBatch.map((item) => task(item)))];
+    position += batchSize;
+  }
+  return results;
 }
 
 module.exports = promiseAllBatches;

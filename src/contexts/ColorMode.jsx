@@ -1,7 +1,10 @@
-import { createContext, useContext, useState, useMemo } from 'react';
+import React, {
+  createContext, useContext, useState, useMemo,
+} from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 // import useMediaQuery from '@mui/material/useMediaQuery';
+import { childrenProps, childrenDefaults } from '../propTypes/children';
 
 const THEMES = {
   light: createTheme({
@@ -12,12 +15,6 @@ const THEMES = {
       },
       primary: {
         main: '#1c6f95',
-      },
-      error: {
-        main: '#f00',
-      },
-      success: {
-        main: '#008000',
       },
       text: {
         primary: '#6f6f6f',
@@ -30,16 +27,10 @@ const THEMES = {
       mode: 'dark',
       background: {
         default: '#000',
-        paper: '#111',
+        paper: '#060606',
       },
       primary: {
         main: '#2a9fd6',
-      },
-      success: {
-        main: '#008000',
-      },
-      error: {
-        main: '#f00',
       },
       warning: {
         main: '#fcc204',
@@ -74,6 +65,14 @@ export function ColorModeProvider({ children }) {
     </ColorModeContext.Provider>
   );
 }
+
+ColorModeProvider.defaultProps = {
+  children: childrenDefaults,
+};
+
+ColorModeProvider.propTypes = {
+  children: childrenProps,
+};
 
 export function useColorModeContext() {
   return useContext(ColorModeContext);

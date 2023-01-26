@@ -16,10 +16,12 @@
   padding: 0;
   font-size: 2em;
 }
+
 .App-tagline {
   margin: 0;
   padding: 0;
 }
+
 .App-instructions {
   max-width: 530px;
   margin: 3em auto 0;
@@ -35,43 +37,39 @@
   margin-right: 0.25em;
 }
 
-.ShipIconChip-image {
-  width: 2em;
-  border-radius: 100%;
-}
-
-.Controls {
-  margin: 40px 0 80px;
-}
-
 .PointBreakdown {
   display: grid;
   grid-auto-columns: 1fr;
   grid-auto-flow: column;
   align-items: start;
 }
+
 .PointBreakdown-headline {
   display: block;
   margin: 0;
-  font-family: "Roboto","Helvetica","Arial",sans-serif;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
   font-weight: 400;
   font-size: 1.5rem;
   line-height: 1.334;
   letter-spacing: 0em;
   text-align: left;
 }
+
 .ItemList .ItemList-item {
   position: relative;
   padding: 1em 0 0;
 }
+
 @media screen and (max-width: 620px) {
   .PointBreakdown {
     display: block;
   }
+
   .PointBreakdown-victim,
   .PointBreakdown-attacker {
     width: 100%;
   }
+
   .PointBreakdown-headline {
     text-align: center;
   }
