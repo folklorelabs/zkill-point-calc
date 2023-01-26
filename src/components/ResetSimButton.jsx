@@ -7,7 +7,7 @@ import {
 import {
   Delete as DeleteIcon,
 } from '@mui/icons-material';
-import { reset, useZkillPointsContext } from '../contexts/ZkillPoints';
+import { resetZkill, useZkillPointsContext } from '../contexts/ZkillPoints';
 
 function ResetSimButton() {
   const { zkillPointsState, zkillPointsDispatch } = useZkillPointsContext();
@@ -16,7 +16,7 @@ function ResetSimButton() {
       <IconButton
         // endIcon={<DeleteIcon />}
         onClick={() => {
-          zkillPointsDispatch(reset());
+          zkillPointsDispatch(resetZkill());
         }}
       >
         {/* Reset */}

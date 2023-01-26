@@ -28,7 +28,6 @@ export default function parseEft(eft) {
     })
     .filter((module) => !!module);
   return {
-    ...ship,
     ship,
     modules,
   };

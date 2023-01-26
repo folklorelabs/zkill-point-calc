@@ -12,11 +12,9 @@ import {
   IosShare as IosShareIcon,
 } from '@mui/icons-material';
 import { useZkillPointsContext } from '../contexts/ZkillPoints';
-import useSimUrl from '../hooks/useSimUrl';
 
 function CopySimButton() {
   const { zkillPointsState } = useZkillPointsContext();
-  const url = useSimUrl();
   const [copyPopAnchor, setCopyPopAnchor] = useState(null);
   return (
     <>
@@ -25,7 +23,7 @@ function CopySimButton() {
           <IconButton
             onClick={(e) => {
               e.preventDefault();
-              navigator.clipboard.writeText(url);
+              navigator.clipboard.writeText(zkillPointsState.url);
               setCopyPopAnchor(e.currentTarget);
             }}
             // endIcon={<IosShareIcon />}

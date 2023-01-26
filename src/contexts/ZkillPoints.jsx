@@ -9,14 +9,14 @@ import { childrenProps, childrenDefaults } from '../propTypes/children';
 import SHIPS from '../data/ships.json';
 import MODULES from '../data/modules.json';
 
+import getKillmailSimUrl from '../utils/getKillmailSimUrl';
 import uuid from '../utils/uuid';
-import parseEft from '../utils/parseEft';
 
 export function parseUrlLegacy() {
   const url = new URL(window.location);
   const params = url.searchParams;
-  const ship = SHIPS.find((s) => s.name === params.get('shipInfo'));
-  if (!ship) return {};
+  const shipInfo = SHIPS.find((s) => s.name === params.get('shipInfo'));
+  if (!shipInfo) return {};
   const victimModulesQuery = params.get('victimModules') || '';
   const victimModules = victimModulesQuery.split(',')
     .map((moduleName) => MODULES.find((m) => m.name === moduleName))
@@ -25,29 +25,29 @@ export function parseUrlLegacy() {
       ...module,
       uuid: uuid(),
     }));
-  const shipInfo = victimModules.length && {
-    ...ship,
-    modules: victimModules,
-  };
   const attackersQuery = params.get('attackers') || '';
   const attackers = attackersQuery.split(',')
     .map((shipName) => SHIPS.find((s) => s.name === shipName))
     .filter((matchingShip) => !!matchingShip);
   return {
     shipInfo,
+    modules: victimModules,
     attackers,
   };
 }
 
 export function parseUrl() {
+  const legacyData = parseUrlLegacy();
   const url = new URL(window.location);
   const params = url.searchParams;
+
   const [shipStr, modulesStr = '', attackersStr = '', zkillId = ''] = (params.get('k') || '').split('-');
-  if (!shipStr) return {};
-  const ship = SHIPS.find((s) => s.id === shipStr);
-  if (!ship) return {};
-  const victimModulesQuery = modulesStr || '';
-  const victimModules = victimModulesQuery.split('.')
+  if (!shipStr && !legacyData.shipInfo) return {};
+  const shipInfo = legacyData.shipInfo || SHIPS.find((s) => s.id === shipStr);
+  if (!shipInfo && !legacyData.shipInfo) return {};
+  const modulesQuery = modulesStr || '';
+  const modules = legacyData.modules || modulesQuery.split('.')
+    .filter((m) => !!m)
     .reduce((all, m) => {
       const [moduleId, qtyStr] = m.split('_');
       const qty = parseInt(qtyStr || 1, 10);
@@ -61,16 +61,14 @@ export function parseUrl() {
         })),
       ];
     }, []);
-  const shipInfo = {
-    ...ship,
-    modules: victimModules,
-  };
-  const attackers = attackersStr.split('.')
+
+  const attackers = legacyData.attackers || attackersStr.split('.')
+    .filter((s) => !!s)
     .reduce((all, s) => {
       const [shipId, qtyStr] = s.split('_');
       const qty = parseInt(qtyStr || 1, 10);
       const matchingShip = SHIPS.find((sd) => sd.id === shipId);
-      if (!ship) return all;
+      if (!shipInfo) return all;
       return [
         ...all,
         ...Array.from(Array(qty || 1)).map(() => ({
@@ -78,43 +76,58 @@ export function parseUrl() {
         })),
       ];
     }, []);
-  return {
+
+  const data = {
     shipInfo,
+    modules,
     attackers,
     zkillId,
   };
+  return data;
 }
 
 // STATE
 const INITIAL_STATE = {
   shipInfo: null,
+  modules: [],
   attackers: [],
   zkillId: null,
+  url: window.location.href,
 };
 
 // ACTIONS
 export const ACTIONS = {
   RESET: 'RESET',
-  LOAD_VICTIM: 'LOAD_VICTIM',
-  LOAD_INVOLVED: 'LOAD_INVOLVED',
-  SET_ZKILL_ID: 'SET_ZKILL_ID',
+  LOAD: 'LOAD',
 };
-export function reset() {
+export function resetZkill() {
   return [ACTIONS.RESET];
 }
-export function loadVictim(victim) {
-  const shipInfo = typeof victim === 'string' ? parseEft(victim) : victim;
-  return [ACTIONS.LOAD_VICTIM, shipInfo];
-}
-export function loadAttackers(ships) {
-  const attackers = ships.map((ship) => ({
-    ...ship,
-    uuid: uuid(),
-  }));
-  return [ACTIONS.LOAD_INVOLVED, attackers];
-}
-export function setZkillId(zkillId) {
-  return [ACTIONS.SET_ZKILL_ID, zkillId];
+export function loadZkill({
+  shipInfo,
+  modules,
+  attackers,
+  zkillId,
+}) {
+  const payload = {
+    shipInfo: {
+      ...shipInfo,
+    },
+    modules: modules ? modules.map((m) => ({
+      ...m,
+      uuid: m.uuid || uuid(),
+    })) : INITIAL_STATE.modules,
+    attackers: attackers ? attackers.map((a) => ({
+      ...a,
+      uuid: a.uuid || uuid(),
+    })) : INITIAL_STATE.attackers,
+    zkillId,
+  };
+  const url = `${getKillmailSimUrl(payload)}`;
+  return [ACTIONS.LOAD, {
+    ...payload,
+    url,
+  }];
 }
 
 // REDUCER
@@ -125,38 +138,14 @@ function REDUCER(state, [type, payload]) {
         ...state,
         ...INITIAL_STATE,
       };
-    case ACTIONS.LOAD_VICTIM:
+    case ACTIONS.LOAD:
       return {
         ...state,
-        shipInfo: payload,
-      };
-    case ACTIONS.ADD_INVOLVED:
-      return {
-        ...state,
-        attackers: [
-          ...state.attackers,
-          {
-            ...payload,
-            uuid: uuid(),
-          },
-        ],
-      };
-    case ACTIONS.LOAD_INVOLVED:
-      return {
-        ...state,
-        attackers: payload,
-      };
-    case ACTIONS.REMOVE_INVOLVED:
-      return {
-        ...state,
-        attackers: [
-          ...state.attackers.filter((ship) => ship.uuid !== payload),
-        ],
-      };
-    case ACTIONS.SET_ZKILL_ID:
-      return {
-        ...state,
-        zkillId: payload,
+        shipInfo: payload.shipInfo,
+        modules: payload.modules,
+        attackers: payload.attackers,
+        zkillId: payload.zkillId,
+        url: payload.url,
       };
     default:
       return { ...state };
@@ -183,8 +172,8 @@ export function getDangerFactor(state) {
     // Mining ships don't earn as many points
     $dangerFactor -= ($itemInfo['groupID'] == 54) * $qty * $meta;
   */
-  if (!state.shipInfo) return 0;
-  const victimDangerFactor = state.shipInfo.modules
+  if (!state.shipInfo || !state.modules || !state.modules.length) return 0;
+  const victimDangerFactor = state.modules
     .reduce((totalDanger, module) => totalDanger + module.dangerFactor, 0);
   return victimDangerFactor;
 }
@@ -258,28 +247,40 @@ export function ZkillPointsProvider({
 }) {
   const [zkillPointsState, zkillPointsDispatch] = useReducer(REDUCER, INITIAL_STATE);
 
+  useEffect(() => {
+    const loadStateFromUrl = () => {
+      const {
+        shipInfo,
+        modules,
+        attackers,
+        zkillId,
+      } = parseUrl();
+      if (!shipInfo) return;
+      zkillPointsDispatch(loadZkill({
+        shipInfo,
+        modules,
+        attackers,
+        zkillId,
+      }));
+    };
+    window.addEventListener('popstate', loadStateFromUrl);
+    loadStateFromUrl();
+    return () => {
+      window.removeEventListener('popstate', loadStateFromUrl);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (zkillPointsState.url !== window.location.href) {
+      window.history.pushState({}, '', `${zkillPointsState.url}`);
+    }
+  }, [zkillPointsState.url]);
+
   // wrap value in memo so we only re-render when necessary
   const providerValue = useMemo(() => ({
     zkillPointsState,
     zkillPointsDispatch,
   }), [zkillPointsState, zkillPointsDispatch]);
-
-  useEffect(() => {
-    const legacyData = parseUrlLegacy();
-    const data = parseUrl();
-    const shipInfo = data.shipInfo || legacyData.shipInfo;
-    const attackers = data.attackers || legacyData.attackers;
-    const { zkillId } = data;
-    if (shipInfo && shipInfo.id && shipInfo.name) {
-      zkillPointsDispatch(loadVictim(shipInfo));
-    }
-    if (attackers && attackers.length) {
-      zkillPointsDispatch(loadAttackers(attackers));
-    }
-    if (zkillId) {
-      zkillPointsDispatch(setZkillId(zkillId));
-    }
-  }, []);
 
   return (
     <ZkillPointsContext.Provider value={providerValue}>

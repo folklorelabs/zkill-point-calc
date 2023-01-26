@@ -37,7 +37,6 @@ function App() {
   const state = useMemo(() => {
     const dangerFactor = getDangerFactor(zkillPointsState);
     return {
-      shipInfo: zkillPointsState.shipInfo,
       basePoints: getBasePoints(zkillPointsState),
       dangerFactor,
       blobPenalty: (Math.round((1 / getBlobPenalty(zkillPointsState)) * 1000) - 1000) / 10,
@@ -47,7 +46,6 @@ function App() {
     };
   }, [zkillPointsState]);
   const [copyPopAnchor, setCopyPopAnchor] = useState(null);
-
   return (
     <Box
       sx={{
@@ -64,7 +62,7 @@ function App() {
         <AppToolbar />
       </Box>
       <Divider />
-      {!state.shipInfo ? (
+      {!zkillPointsState.shipInfo ? (
         <Box
           sx={{
             margin: '40px auto 80px',
@@ -97,8 +95,8 @@ function App() {
               <ul className="ItemList">
                 <li className="ItemList-item">
                   <Item
-                    itemImageSrc={`https://images.evetech.net/types/${state.shipInfo.id}/icon?size=64`}
-                    itemName={state.shipInfo.name}
+                    itemImageSrc={`https://images.evetech.net/types/${zkillPointsState.shipInfo.id}/icon?size=64`}
+                    itemName={zkillPointsState.shipInfo.name}
                     itemTooltip={'Ship points are determined by their in-game "Rig Size" attribute. The formula is 5 ⁽ʳⁱᵍ ˢⁱᶻᵉ⁾.'}
                     itemText={`${state.basePoints} points`}
                   />
@@ -108,13 +106,14 @@ function App() {
                     itemImageSrc="https://images.evetech.net/types/23740/icon?size=64"
                     itemName="Danger Factor"
                     itemTooltip={'Danger Factor is the sum of all "dangerous" and "snuggly" modules fitted to the ship and flagged as a "High Slot", "Mid Slot", "Low Slot", or "SubSystem" in the killmail. A module is considered "dangerous" if it can be overehated or if it belongs to the "Drone Damage Module" group. A module is considered "snuggly" if it belonging to the "Mining Laser" group. Abyssal mods are not factored into this calculation more than likely because of complexity.'}
-                    itemText={`${state.dangerFactor || 0} points`}
+                    itemText={state.dangerFactor ? `${state.dangerFactor} points` : '--'}
+                    demphasized={!state.dangerFactor}
                   />
                 </li>
                 <li>
                   <NestedItemList className="ItemList">
                     {
-                      state.shipInfo.modules
+                      zkillPointsState.modules
                         .sort((a, b) => Math.abs(b.dangerFactor) - Math.abs(a.dangerFactor))
                         .map((module) => (
                           <li
@@ -187,7 +186,7 @@ function App() {
                           itemImageSrc={`https://images.evetech.net/types/${ship.id}/icon?size=64`}
                           itemName={ship.name}
                           itemTooltip={`Ship points are determined by their in-game "Rig Size" attribute. The formula is 5 ⁽ʳⁱᵍ ˢⁱᶻᵉ⁾. ${ship.name === 'Capsule' ? ' Capsules are a special case. A capsules "Rig Size" is equal to that of the victim ship + 1.' : ''}`}
-                          itemText={`${ship.name === 'Capsule' ? 5 ** (state.shipInfo.rigSize + 1) : 5 ** ship.rigSize} points`}
+                          itemText={`${ship.name === 'Capsule' ? 5 ** (zkillPointsState.shipInfo.rigSize + 1) : 5 ** ship.rigSize} points`}
                         />
                       </li>
                     ))}

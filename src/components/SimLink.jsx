@@ -7,16 +7,14 @@ import {
   Launch as LaunchIcon,
 } from '@mui/icons-material';
 import { useZkillPointsContext } from '../contexts/ZkillPoints';
-import useSimUrl from '../hooks/useSimUrl';
 
 function CopySimButton({ onClick }) {
   const { zkillPointsState } = useZkillPointsContext();
-  const url = useSimUrl();
   return zkillPointsState.shipInfo ? (
     <Button
       onClick={onClick}
       endIcon={<LaunchIcon />}
-      href={url}
+      href={zkillPointsState.url}
       target="_blank"
       rel="noreferrer"
     >

@@ -17,9 +17,7 @@ import { useTheme } from '@emotion/react';
 import { debounce } from 'throttle-debounce';
 import {
   useZkillPointsContext,
-  loadVictim,
-  loadAttackers,
-  setZkillId,
+  loadZkill,
 } from '../contexts/ZkillPoints';
 
 import { shipProps } from '../propTypes/ship';
@@ -84,7 +82,7 @@ function IconChip({ data, ...params }) {
           src={`https://images.evetech.net/types/${data.id}/icon?size=32`}
           alt=""
         />
-)}
+      )}
       label={data.name}
       {...params}
     />
@@ -99,11 +97,10 @@ IconChip.propTypes = {
 
 function SimControls({ onSuccess, submitText }) {
   const { zkillPointsState, zkillPointsDispatch } = useZkillPointsContext();
-  const [shipInfo, setShipInfo] = React.useState(zkillPointsState.shipInfo);
-  const [modules, setModules] = React.useState(zkillPointsState.shipInfo
-    ? zkillPointsState.shipInfo.modules : []);
+  const [ship, setShip] = React.useState(zkillPointsState.shipInfo);
+  const [modules, setModules] = React.useState(zkillPointsState.modules);
   const [attackers, setAttackers] = React.useState(zkillPointsState.attackers);
-  const [zkillUrl, setZkillUrl] = React.useState('');
+  const [zkillUrl, setZkillUrl] = React.useState(zkillPointsState.zkillId ? `https://zkillboard.com/kill/${zkillPointsState.zkillId}/` : '');
   const [errors, setErrors] = React.useState({});
   const availableAttackers = useMemo(() => [
     ...SHIPS,
@@ -114,44 +111,29 @@ function SimControls({ onSuccess, submitText }) {
   ].sort((a, b) => `${a.group}`.localeCompare(`${b.group}`)), []);
   const submit = React.useCallback(() => {
     const newErrors = {};
-    try {
-      if (!shipInfo) throw new Error('No ship selected');
-      zkillPointsDispatch(loadVictim({
-        ...shipInfo,
-        modules,
-      }));
-    } catch (err) {
-      newErrors.ship = `${err}`;
-    }
-    try {
-      if (attackers && attackers.length) {
-        zkillPointsDispatch(loadAttackers(attackers));
-      }
-    } catch (err) {
-      newErrors.attackers = `${err}`;
-    }
-    try {
-      if (zkillUrl) {
-        const zkillMatch = /zkillboard\.com\/kill\/(\d+)(\/|$)/.exec(zkillUrl);
-        if (!zkillMatch || !zkillMatch[1]) throw new Error('Invalid zKillboard url. Please check the URL.');
-        zkillPointsDispatch(setZkillId(zkillMatch[1]));
-      }
-    } catch (err) {
-      newErrors.zkillUrl = `${err}`;
-    }
+    if (!ship) newErrors.ship = 'No ship selected';
+    const zkillMatch = /zkillboard\.com\/kill\/(\d+)(\/|$)/.exec(zkillUrl);
+    if (zkillUrl && (!zkillMatch || !zkillMatch[1])) newErrors.zkillUrl = 'Invalid zKillboard url. Please check the URL.';
+    const zkillId = zkillMatch && zkillMatch.length && zkillMatch[1];
     if (!Object.keys(newErrors).length) {
+      zkillPointsDispatch(loadZkill({
+        shipInfo: ship,
+        modules,
+        attackers,
+        zkillId,
+      }));
       onSuccess();
       setErrors({});
     } else {
       setErrors(newErrors);
     }
   }, [
-    zkillUrl,
+    zkillPointsDispatch,
     onSuccess,
-    shipInfo,
+    ship,
     modules,
     attackers,
-    zkillPointsDispatch,
+    zkillUrl,
   ]);
 
   return (
@@ -173,7 +155,7 @@ function SimControls({ onSuccess, submitText }) {
       >
         <EftImportModal
           onSuccess={({ ship: newShip, modules: newModules }) => {
-            setShipInfo(newShip);
+            setShip(newShip);
             setModules(newModules);
           }}
         />
@@ -181,7 +163,7 @@ function SimControls({ onSuccess, submitText }) {
       <Autocomplete
         clearOnEscape
         options={availableShips}
-        value={shipInfo}
+        value={ship}
         isOptionEqualToValue={() => false}
         groupBy={(option) => `${option.category !== 'Ship' ? `${option.category} - ${option.group}` : option.group}`}
         getOptionLabel={(option) => option.name}
@@ -189,7 +171,7 @@ function SimControls({ onSuccess, submitText }) {
         sx={{ mb: 3 }}
         renderInput={(params) => (
           <TextField
-            error={errors.ship}
+            error={!!errors.ship}
             helperText={errors.ship}
             label="Ship"
             {...params}
@@ -208,7 +190,7 @@ function SimControls({ onSuccess, submitText }) {
           </li>
         )}
         onChange={(event, newValue) => {
-          setShipInfo(newValue);
+          setShip(newValue);
         }}
       />
       <Autocomplete
@@ -225,7 +207,7 @@ function SimControls({ onSuccess, submitText }) {
         fullWidth
         renderInput={(params) => (
           <TextField
-            error={errors.modules}
+            error={!!errors.modules}
             label="Modules"
             {...params}
           />
@@ -260,7 +242,7 @@ function SimControls({ onSuccess, submitText }) {
         sx={{ mb: 1 }}
         renderInput={(params) => (
           <TextField
-            error={errors.attackers}
+            error={!!errors.attackers}
             label="Attackers"
             helperText={errors.attackers}
             {...params}
@@ -292,10 +274,11 @@ function SimControls({ onSuccess, submitText }) {
         Select the &quot;Rat&quot; option for any non-player attacker.
       </Typography>
       <TextField
-        error={errors.zkillUrl}
+        error={!!errors.zkillUrl}
         helperText={errors.zkillUrl}
         label="Related zKillboard URL"
         fullWidth
+        defaultValue={zkillUrl}
         sx={{ mb: 3 }}
         onChange={debounce(300, (e) => {
           setZkillUrl(e.target.value);
