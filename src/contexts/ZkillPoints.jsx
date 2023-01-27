@@ -243,6 +243,12 @@ export function getTotalPoints(state) {
   return Math.max(1, points);
 }
 
+export function getBrowserTitle(state) {
+  const siteName = 'Killmail Simulator';
+  if (!state.shipInfo || !state.shipInfo.name) return siteName;
+  return `${state.shipInfo.name} (${getTotalPoints(state)} points) | ${siteName}`;
+}
+
 const ZkillPointsContext = createContext({
   zkillPointsState: INITIAL_STATE,
   zkillPointsDispatch: () => {},
@@ -255,19 +261,10 @@ export function ZkillPointsProvider({
 
   useEffect(() => {
     const loadStateFromUrl = () => {
-      const {
-        shipInfo,
-        modules,
-        attackers,
-        zkillId,
-      } = parseUrl();
-      if (!shipInfo) return;
-      zkillPointsDispatch(loadZkill({
-        shipInfo,
-        modules,
-        attackers,
-        zkillId,
-      }));
+      const newState = parseUrl();
+      if (!newState.shipInfo) return;
+      zkillPointsDispatch(loadZkill(newState));
+      document.title = getBrowserTitle(newState);
     };
     window.addEventListener('popstate', loadStateFromUrl);
     loadStateFromUrl();
@@ -279,8 +276,9 @@ export function ZkillPointsProvider({
   useEffect(() => {
     if (zkillPointsState.url !== window.location.href) {
       window.history.pushState({}, '', `${zkillPointsState.url}`);
+      document.title = getBrowserTitle(zkillPointsState);
     }
-  }, [zkillPointsState.url]);
+  }, [zkillPointsState]);
 
   // wrap value in memo so we only re-render when necessary
   const providerValue = useMemo(() => ({
