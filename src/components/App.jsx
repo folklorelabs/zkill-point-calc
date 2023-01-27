@@ -1,5 +1,5 @@
 import React, {
-  useMemo, useState,
+  useMemo,
 } from 'react';
 
 import {
@@ -7,7 +7,6 @@ import {
   Typography,
   Link,
   Divider,
-  Popover,
 } from '@mui/material';
 
 import {
@@ -24,6 +23,7 @@ import AppToolbar from './AppToolbar';
 import AppHeader from './AppHeader';
 import SimControls from './SimControls';
 import { TypeEmphasis } from './TypeEmphasis';
+import CopyBookmarkletButton from './CopyBookmarkletButton';
 
 import {
   NestedItemList,
@@ -45,7 +45,6 @@ function App() {
       totalPoints: getTotalPoints(zkillPointsState),
     };
   }, [zkillPointsState]);
-  const [copyPopAnchor, setCopyPopAnchor] = useState(null);
   return (
     <Box
       sx={{
@@ -197,6 +196,9 @@ function App() {
           </Box>
         </Box>
       )}
+      <Box>
+        <CopyBookmarkletButton />
+      </Box>
       <Box className="App-instructions" sx={{ textAlign: 'center', px: 2, my: 6 }}>
         <Typography variant="body2">
           Killmail Simulator was brought to you by
@@ -214,23 +216,6 @@ function App() {
           .
         </Typography>
       </Box>
-      <Popover
-        open={Boolean(copyPopAnchor)}
-        anchorEl={copyPopAnchor}
-        onClose={() => {
-          setCopyPopAnchor(null);
-        }}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
-        }}
-      >
-        <Typography sx={{ p: 2 }}>Link to this simulation copied to clipboard</Typography>
-      </Popover>
     </Box>
   );
 }
