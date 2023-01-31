@@ -44,7 +44,10 @@ async function getShips() {
 }
 
 async function getModules() {
-  const modules = await getAllTypesByCategory('Module');
+  const modules = [
+    ...(await getAllTypesByCategory('Module')),
+    ...(await getAllTypesByCategory('Subsystem')),
+  ];
 
   // look up attr ids
   const attrTypes = await Fuzzworks.getData('dgmAttributeTypes');
